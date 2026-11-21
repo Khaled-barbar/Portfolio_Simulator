@@ -1,0 +1,46 @@
+{
+  "version": "web-1.0.0",
+  "repo": "Khaled-barbar/Portfolio_Simulator",
+  "agents": {
+    "gemini": {"provider": "manual", "model": "gemini-app"},
+    "chatgpt": {"provider": "manual", "model": "codex"},
+    "claude": {"provider": "manual", "model": "claude-app"}
+  },
+  "lab": {
+    "benchmark": "XEQT.TO",
+    "universe": ["XEQT.TO", "VFV.TO", "XUU.TO", "VEQT.TO", "ZQQ.TO", "XEF.TO", "XEC.TO", "XIC.TO", "CASH"],
+    "min_forecasts_per_agent": 4,
+    "horizons_days": [30, 90, 180],
+    "session_day": 20,
+    "question": "Today the investor adds 100 CAD to a TFSA at Wealthsimple (horizon 15 years,\nalready holds a diversified equity ETF portfolio). How should this month's 100 CAD be\nallocated across the allowed universe, and what are your calibrated forecasts?",
+    "core_forecasts": [
+      {"kind": "return_above", "ticker_a": "XEQT.TO", "threshold": 0.0, "horizon_days": 30},
+      {"kind": "return_above", "ticker_a": "XEQT.TO", "threshold": 0.02, "horizon_days": 90},
+      {"kind": "outperform", "ticker_a": "VFV.TO", "ticker_b": "XEQT.TO", "horizon_days": 90},
+      {"kind": "outperform", "ticker_a": "ZQQ.TO", "ticker_b": "VFV.TO", "horizon_days": 180},
+      {"kind": "outperform", "ticker_a": "XEF.TO", "ticker_b": "VFV.TO", "horizon_days": 180},
+      {"kind": "outperform", "ticker_a": "XIC.TO", "ticker_b": "XEQT.TO", "horizon_days": 90}
+    ]
+  },
+  "stocks": {
+    "enabled": true,
+    "benchmark": "XEQT.TO",
+    "compare": ["SPY", "XIU.TO"],
+    "min_picks": 5,
+    "max_picks": 15,
+    "max_weight": 0.25,
+    "fx_fee": 0.015,
+    "horizons_days": [30, 90, 180],
+    "min_forecasts_per_agent": 9,
+    "question": "Today the investor puts 100 CAD into INDIVIDUAL COMPANIES (no ETFs or funds) inside a\nWealthsimple TFSA, horizon 15 years, in addition to a diversified ETF core. Which listed\ncompanies (TSX, NYSE, NASDAQ or other exchanges available at Wealthsimple) are most worth\nowning now, and what percentage of the 100 CAD should go to each? Buying a non-CAD stock\nfrom the CAD account costs a 1.5% FX fee each way.",
+    "core_forecasts": [
+      {"kind": "outperform", "ticker_a": "NVDA", "ticker_b": "SPY", "horizon_days": 90},
+      {"kind": "outperform", "ticker_a": "MSFT", "ticker_b": "SPY", "horizon_days": 90},
+      {"kind": "outperform", "ticker_a": "AAPL", "ticker_b": "SPY", "horizon_days": 180},
+      {"kind": "outperform", "ticker_a": "BRK-B", "ticker_b": "SPY", "horizon_days": 180},
+      {"kind": "outperform", "ticker_a": "RY.TO", "ticker_b": "XIU.TO", "horizon_days": 90},
+      {"kind": "outperform", "ticker_a": "SHOP.TO", "ticker_b": "XIU.TO", "horizon_days": 180}
+    ]
+  },
+  "always_fetch": ["SPY", "AOR", "URTH", "XIU.TO", "XEQT.TO"]
+}
