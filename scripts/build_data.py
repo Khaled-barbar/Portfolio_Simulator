@@ -1,36 +1,47 @@
-"""Builds the site's price database (site/data/index.json + site/data/prices/<ticker>.json).
+"""Builds the site's price database and (optionally) publishes the site. Run it on YOUR computer:
 
-Runs every weekday in GitHub Actions (see .github/workflows/publish.yml); standard library only.
-Source: Yahoo Finance chart API — adjusted closes (dividends included) + actual closes + currency.
+    python scripts/build_data.py              download/refresh prices into site/data/
+    python scripts/build_data.py --publish    ... then push the finished site to the `site` branch
+                                              (Kinsta deploys that branch automatically)
 
-Tickers fetched:
-  - everything the app uses by default (site/config.json: fund universe, benchmarks, core questions,
-    always_fetch; site/data/investors.json: holdings, listed vehicles, benchmarks)
-  - every line of scripts/tickers.txt (add any company or fund you want to use on the site)
-  - the exchange rate <CUR>CAD=X of every non-CAD currency found
+Windows: double-click scripts/publish_prices.bat. Linux/macOS: scripts/publish_prices.sh.
+Needs Python 3.11+ and Git (with access to this repository). Standard library only.
 
-If a download fails, the previous day's file (from --prev, the last published site) is kept.
+Source: Yahoo Finance chart API — adjusted closes (dividends included), actual closes, currency.
+Prices are downloaded from your own connection, the same way the Agents Lab desktop app does it.
+After the first run, only the last few weeks are downloaded per ticker (site/data/prices is a local
+cache, ignored by git on main); the whole history is downloaded again when a new dividend or split
+changed the adjusted prices.
 
-    python scripts/build_data.py [--prev DIR] [--only AAPL,MSFT]
+Tickers: everything the app uses (site/config.json, site/data/investors.json), every line of
+scripts/tickers.txt, and the exchange rate <CUR>CAD=X of every non-CAD currency.
+If a download fails, the ticker's previous data is kept.
 """
 import argparse
 import json
 import re
 import shutil
+import subprocess
+import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 OUT = SITE / "data"
 HISTORY = "2016-01-01"
-UA = {"user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
+UA = {"user-agent": "Mozilla/5.0"}
 SUBUNITS = {"GBp": "GBP", "GBX": "GBP", "ZAc": "ZAR", "ILA": "ILS"}
 TICKER_RE = re.compile(r"^[A-Z0-9^][A-Z0-9.\-=^]{0,19}$")
+
+
+def say(*a):
+    print(*a, flush=True)
 
 
 def fname(t):
@@ -58,19 +69,24 @@ def wanted():
     t.discard("CASH")
     bad = sorted(x for x in t if not TICKER_RE.match(x))
     if bad:
-        print("ignored (not a Yahoo ticker):", ", ".join(bad))
+        say("ignored (not a Yahoo ticker):", ", ".join(bad))
     return sorted(x for x in t if TICKER_RE.match(x))
 
 
-def get(url, tries=4):
+class Refused(Exception):
+    """Yahoo answered 429/403: it is limiting this connection."""
+
+
+def get(url, tries=3):
     for k in range(tries):
         try:
-            req = urllib.request.Request(url, headers=UA)
-            with urllib.request.urlopen(req, timeout=30) as r:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
                 return json.loads(r.read())
         except urllib.error.HTTPError as e:
             if e.code in (400, 404):
-                raise
+                raise ValueError(f"HTTP {e.code} (unknown ticker?)")
+            if e.code in (403, 429):
+                raise Refused(f"HTTP {e.code}")
             if k == tries - 1:
                 raise
         except Exception:
@@ -79,8 +95,8 @@ def get(url, tries=4):
         time.sleep(2 * (k + 1))
 
 
-def download(ticker):
-    p1 = int(datetime.fromisoformat(HISTORY).replace(tzinfo=timezone.utc).timestamp()) - 7 * 86400
+def download(ticker, start):
+    p1 = int(datetime.fromisoformat(start).replace(tzinfo=timezone.utc).timestamp()) - 7 * 86400
     p2 = int(time.time()) + 86400
     url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ticker)}"
            f"?period1={p1}&period2={p2}&interval=1d&events=div%7Csplit")
@@ -108,12 +124,28 @@ def sig(x):
     return float(f"{x:.7g}")
 
 
+def path_of(t):
+    return OUT / "prices" / f"{fname(t)}.json"
+
+
+def read(t):
+    """Stored rows {date: (adj, raw)} or None."""
+    p = path_of(t)
+    if not p.is_file():
+        return None
+    j = json.loads(p.read_text(encoding="utf-8"))
+    d, rows = date.fromisoformat(j["s"]), {}
+    for g, a, r in zip(j["g"], j["a"], j.get("r", j["a"])):
+        d += timedelta(days=g)
+        rows[d.isoformat()] = (a, r)
+    return rows
+
+
 def write(ticker, rows):
     ds = sorted(rows)
     if not ds:
         return None
-    start = date.fromisoformat(ds[0])
-    s = start.fromordinal(start.toordinal() - 1).isoformat()
+    s = (date.fromisoformat(ds[0]) - timedelta(days=1)).isoformat()
     gaps, prev = [], date.fromisoformat(s)
     for d in ds:
         cur = date.fromisoformat(d)
@@ -124,65 +156,135 @@ def write(ticker, rows):
     obj = {"t": ticker, "s": s, "g": gaps, "a": a}
     if r != a:
         obj["r"] = r
-    (OUT / "prices" / f"{fname(ticker)}.json").write_text(json.dumps(obj, separators=(",", ":")), encoding="utf-8")
+    path_of(ticker).write_text(json.dumps(obj, separators=(",", ":")), encoding="utf-8")
     return ds[0], ds[-1], r[-1]
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--prev", help="folder of the previously published site (fallback data)")
-    ap.add_argument("--only", help="comma-separated tickers (testing)")
-    a = ap.parse_args()
+def refresh(t, full=False):
+    """Incremental download; full history again if old adjusted prices changed (new dividend/split)."""
+    old = None if full else read(t)
+    if old:
+        s2 = (date.fromisoformat(max(old)) - timedelta(days=12)).isoformat()
+        meta, new = download(t, s2)
+        same = [d for d in new if d in old]
+        if same and all(abs(new[d][0] / old[d][0] - 1) < 1e-4 for d in same):
+            return meta, {**{d: v for d, v in old.items() if d < s2}, **new}
+    return download(t, HISTORY)
+
+
+def build(only=None, full=False):
     (OUT / "prices").mkdir(parents=True, exist_ok=True)
     prev_index = {}
-    if a.prev and (Path(a.prev) / "data" / "index.json").is_file():
-        prev_index = json.loads((Path(a.prev) / "data" / "index.json").read_text(encoding="utf-8")).get("tickers", {})
-    tickers = a.only.split(",") if a.only else wanted()
-    index, failed = {}, []
+    if (OUT / "index.json").is_file():
+        prev_index = json.loads((OUT / "index.json").read_text(encoding="utf-8")).get("tickers", {})
+    tickers = only or wanted()
+    index, failed, kept = {}, [], []
+    refused = 0
 
     def one(t):
+        nonlocal refused
         try:
-            meta, rows = download(t)
+            if refused >= 15:
+                raise Refused("skipped: Yahoo kept refusing")
+            meta, rows = refresh(t, full)
             info = write(t, rows)
             if not info:
                 raise ValueError("no prices")
             index[t] = {"n": meta.get("longName") or meta.get("shortName"), "c": meta.get("currency"),
                         "x": meta.get("fullExchangeName") or meta.get("exchangeName"), "y": meta.get("instrumentType"),
                         "f": info[0], "l": info[1], "p": info[2]}
-            return True
+            refused = 0
         except Exception as e:
-            old = Path(a.prev or "/nonexistent") / "data" / "prices" / f"{fname(t)}.json"
-            if old.is_file() and t in prev_index:
-                shutil.copy(old, OUT / "prices" / old.name)
+            if isinstance(e, Refused) and "skipped" not in str(e):
+                refused += 1
+                time.sleep(5)
+            if path_of(t).is_file() and t in prev_index:
                 index[t] = prev_index[t]
-                print(f"  {t}: {e} — kept the previous data")
+                kept.append(t)
+                say(f"  {t}: {e} — kept the previous data")
             else:
-                print(f"  {t}: {e} — skipped")
                 failed.append(t)
-            return False
+                say(f"  {t}: {e} — skipped")
         finally:
-            time.sleep(0.25)
+            time.sleep(0.3)
 
-    print(f"{len(tickers)} tickers")
+    say(f"{len(tickers)} tickers")
     for i, t in enumerate(tickers, 1):
         one(t)
         if i % 50 == 0:
-            print(f"  {i}/{len(tickers)}")
+            say(f"  {i}/{len(tickers)}")
     cur = set()
     for t, m in index.items():
         c = SUBUNITS.get(m.get("c") or "", m.get("c") or "")
         if c and c.upper() != "CAD" and m.get("y") != "CURRENCY":
             cur.add(c.upper())
     for c in sorted(cur):
-        if f"{c}CAD=X" not in index:
+        if f"{c}CAD=X" not in index and f"{c}CAD=X" not in failed:
             one(f"{c}CAD=X")
     closes = sorted(m["l"] for t, m in index.items() if not t.endswith("=X"))
     out = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
            "last_close": closes[-1] if closes else None, "failed": sorted(failed), "tickers": dict(sorted(index.items()))}
     (OUT / "index.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"done: {len(index)} tickers, {len(failed)} failed, last close {out['last_close']}")
-    if len(failed) > len(tickers) / 2:
-        print("WARNING: most downloads failed — is Yahoo Finance reachable from here?")
+    say(f"prices: {len(index) - len(kept)} updated, {len(kept)} kept from before, {len(failed)} missing; "
+        f"last close {out['last_close']}")
+    if refused >= 15:
+        say("WARNING: Yahoo Finance refused many requests (HTTP 429). Try again in an hour.")
+    return out
+
+
+def git(*args, cwd=ROOT, check=True):
+    return subprocess.run(["git", *args], cwd=cwd, check=check, text=True, capture_output=True)
+
+
+def publish(branch="site"):
+    """Push site/ (code + data) as a single commit to `branch` of this repository's origin."""
+    if not (OUT / "index.json").is_file():
+        sys.exit("no price data yet — run without --no-download first")
+    try:
+        url = git("remote", "get-url", "origin").stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        sys.exit("git not found, or this folder is not a clone of the repository "
+                 "(git clone https://github.com/Khaled-barbar/Portfolio_Simulator)")
+    with tempfile.TemporaryDirectory() as tmp:
+        dst = Path(tmp) / "site"
+        shutil.copytree(SITE, dst)
+        git("init", "-q", cwd=dst)
+        git("checkout", "-q", "-b", branch, cwd=dst)
+        git("add", "-A", cwd=dst)
+        name = git("config", "user.name", check=False).stdout.strip() or "Portfolio Simulator"
+        mail = git("config", "user.email", check=False).stdout.strip() or "publisher@localhost"
+        stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        git("-c", f"user.name={name}", "-c", f"user.email={mail}", "commit", "-q", "-m", f"Prices {stamp}", cwd=dst)
+        say(f"publishing to {branch} …")
+        r = subprocess.run(["git", "push", "-f", url, f"HEAD:{branch}"], cwd=dst, text=True)
+        if r.returncode:
+            sys.exit("git push failed — check that Git can push to the repository (sign in when Git asks)")
+    say("published ✓ — Kinsta redeploys the site in a minute or two")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--publish", action="store_true", help="push the site to the `site` branch afterwards")
+    ap.add_argument("--no-download", action="store_true", help="publish the prices already downloaded")
+    ap.add_argument("--full", action="store_true", help="re-download the full history of every ticker")
+    ap.add_argument("--only", help="comma-separated tickers (testing)")
+    ap.add_argument("--no-pull", action="store_true", help="do not update the code with git pull first")
+    a = ap.parse_args()
+    for s in (sys.stdout, sys.stderr):
+        try:
+            s.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+    if a.publish and not a.no_pull:
+        r = subprocess.run(["git", "pull", "--ff-only", "-q"], cwd=ROOT, text=True, capture_output=True)
+        if r.returncode:
+            say("note: git pull failed — publishing the code as it is in this folder\n  " + (r.stderr or "").strip())
+    if not a.no_download:
+        out = build(a.only.split(",") if a.only else None, a.full)
+        if not out["tickers"]:
+            sys.exit("no price data at all — is Yahoo Finance reachable?")
+    if a.publish:
+        publish()
 
 
 if __name__ == "__main__":

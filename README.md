@@ -19,25 +19,30 @@ It has the same dashboard as the desktop app, in Arabic and English:
 ## How it works
 
 ```
-main branch                                   site branch (generated, deployed by Kinsta)
+main branch (source)                          site branch (what Kinsta deploys)
 ├── site/            the website              ├── index.html, engine.js, …
 │   ├── index.html   dashboard                └── data/
 │   ├── engine.js    the app logic                ├── index.json        list of securities
 │   ├── config.json  experiment settings          └── prices/*.json     daily prices since 2016
 │   └── data/investors.json
-├── scripts/build_data.py   downloads prices from Yahoo Finance
-├── scripts/tickers.txt     extra tickers to include
-└── .github/workflows/publish.yml
+├── scripts/build_data.py       downloads prices and publishes the site
+├── scripts/publish_prices.bat  Windows: double-click to publish (.sh for Linux/macOS)
+├── scripts/schedule_windows.bat  Windows: publish automatically every weekday
+├── scripts/tickers.txt         extra tickers to include
+└── .github/workflows/publish.yml  republishes code changes (keeps the prices)
 ```
 
-- **Prices:** browsers can't call Yahoo Finance directly, so a GitHub Action
-  (`.github/workflows/publish.yml`) downloads final daily closes. These are adjusted to include
-  dividends and distributions, and come with the actual closes and currencies. The Action covers
-  every ticker the app uses, plus everything in `scripts/tickers.txt` and the exchange rates to CAD.
-  It writes the files into the site and force-pushes the finished site to the **`site`** branch.
-  The `site` branch keeps one commit, so the repository doesn't grow.
-  The Action runs on every push to `main`, every weekday after the markets close, and when you start it
-  from *Actions → Publish site → Run workflow*. If a download fails, it keeps the previous day's prices.
+- **Prices are published from your computer.** Yahoo Finance refuses requests from GitHub's servers,
+  so `scripts/publish_prices` runs on your PC. It downloads prices over your own connection, the same
+  way the desktop app does, and writes them into the site. It then pushes the finished site to the
+  **`site`** branch, and Kinsta redeploys it. Prices are final daily closes, adjusted for dividends and
+  distributions, with the actual closes and currencies.
+  - The first run downloads the full history for about 480 tickers, which takes 5–10 minutes.
+  - After that, it fetches only the last few weeks for each ticker, in a minute or two. It downloads a
+    ticker's full history again only when a new dividend or split changes it.
+  - The `site` branch always holds a single commit, so the repository doesn't grow.
+- **Code changes** pushed to `main` are republished by the GitHub Action. It keeps the prices that are
+  already on `site` and never contacts Yahoo.
 - **Your data** (portfolios, transactions, agent replies, follow dates, snapshots) is stored **in your
   browser** (localStorage). It is never sent to a server. Use *System → Data*:
   - **Download a backup** / **Restore a backup** to save your data or move it to another browser or device.
@@ -48,27 +53,52 @@ The calculations are a line-by-line port of the Python app. On the same prices t
 results: copy simulator, portfolio valuation and time-weighted return, forecast resolution, Brier
 scores, the report, and the prompt text sent to the agents.
 
-## Deploy on Kinsta (Static Site Hosting)
+## Setup
 
-1. **Build the site once.** Push to `main`, or open *Actions → Publish site → Run workflow*. Wait until
-   it finishes (about 6–8 minutes) and check that a `site` branch exists.
-   - If the Action can't push, go to *Settings → Actions → General → Workflow permissions* and select
-     **Read and write permissions**.
-2. In MyKinsta, open **Static Sites → Add site → GitHub** and choose this repository.
-3. Use these settings:
+### 1. On your computer (once)
+
+You need **Python 3.11+** (already installed if you use the Agents Lab desktop app) and
+**[Git](https://git-scm.com/downloads)**. On Windows: `winget install Git.Git`.
+
+```
+git clone https://github.com/Khaled-barbar/Portfolio_Simulator
+```
+
+Then publish the prices for the first time:
+
+- **Windows:** double-click `Portfolio_Simulator\scripts\publish_prices.bat`.
+- **Linux/macOS:** `Portfolio_Simulator/scripts/publish_prices.sh`
+
+The first time you push, Git asks you to sign in to GitHub. A browser window opens; approve it.
+
+### 2. On Kinsta (once)
+
+1. In MyKinsta, open **Static Sites → Add site → GitHub** and choose this repository.
+2. Use these settings:
    - **Branch:** `site`
-   - **Automatic deployment on commit:** on. Every daily price update then redeploys the site.
+   - **Automatic deployment on commit:** on. Every price publish then redeploys the site.
    - **Build command:** leave empty
    - **Node version:** any (it isn't used)
    - **Publish directory:** leave empty (the site is at the root of the `site` branch)
-4. Create the site. Kinsta gives you a `*.kinsta.page` URL, and you can add your own domain afterwards.
+3. Create the site. Kinsta gives you a `*.kinsta.page` URL, and you can add your own domain afterwards.
+
+### 3. Daily prices (optional)
+
+- **Windows:** double-click `scripts\schedule_windows.bat` once. It creates a scheduled task that
+  publishes every weekday at 18:45, after the TSX/NYSE close. If the computer is off at that time, the
+  task runs when it is next on. The log is in `logs\publish.log`.
+- **Linux/macOS:** add this line with `crontab -e`:
+  `45 18 * * 1-5 /path/to/Portfolio_Simulator/scripts/publish_prices.sh --scheduled`
+
+You can also just run `publish_prices` whenever you want fresh prices.
 
 ## Common tasks
 
 | Task | How |
 |---|---|
-| Add a company or fund that search can't find | Add its Yahoo Finance ticker on a new line in `scripts/tickers.txt` (for example `ENB.TO`, `ASML.AS`, `7203.T`) and commit. The site is republished with its prices a few minutes later. *System → Data* lists the tickers you tried that are missing. |
-| Refresh prices now | *Actions → Publish site → Run workflow* |
+| Add a company or fund that search can't find | Add its Yahoo Finance ticker on a new line in `scripts/tickers.txt` (for example `ENB.TO`, `ASML.AS`, `7203.T`), then run `publish_prices`. *System → Data* on the site lists the tickers you tried that are missing. If you edited the file on GitHub, the publish script picks it up automatically: it runs `git pull` first. |
+| Refresh prices now | Run `scripts/publish_prices.bat` (or `.sh`) |
+| Re-download every ticker's full history | `python scripts/build_data.py --full --publish` |
 | Change experiment settings (fund list, core questions, stock-pick limits) | Edit `site/config.json`. **Don't change it during a running experiment**, because the prompts must stay the same every month. |
 | Update the investor list | Replace `site/data/investors.json` (same format as the desktop app). |
 | Test locally | `python scripts/build_data.py` then `cd site && python -m http.server 8000` and open http://localhost:8000 |
@@ -77,6 +107,8 @@ scores, the report, and the prompt text sent to the agents.
 
 - Prices come from Yahoo Finance and are for personal, non-commercial use. This is a paper-trading tool:
   no real money is moved.
+- If Yahoo answers "HTTP 429" to many requests, the script stops asking, keeps the previous prices and
+  still publishes. Try again an hour later.
 - The site is public, but each visitor only sees the data in their own browser.
 - `site/vendor/sql-wasm.*` is [sql.js](https://github.com/sql-js/sql.js) (MIT). It is used only to read
   `lab.db` when you import from the desktop app.

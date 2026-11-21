@@ -3,3 +3,4 @@ site/data/prices/
 site/data/index.json
 _prev/
 __pycache__/
+logs/

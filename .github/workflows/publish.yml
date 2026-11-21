@@ -1,13 +1,12 @@
 name: Publish site
 
-# Builds the price database from Yahoo Finance and publishes the static site to the `site` branch,
-# which Kinsta deploys. Runs on every push to main, every weekday after the markets close, and on demand.
+# Prices are downloaded and published from your own computer (scripts/publish_prices.bat or .sh),
+# because Yahoo Finance refuses requests from GitHub's servers. This workflow only republishes the
+# site when its code changes on main: it takes the new code from main and keeps the prices that are
+# already on the `site` branch. It never contacts Yahoo.
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: "37 22 * * 1-5"   # 22:37 UTC, after the TSX/NYSE close (summer and winter time)
-    - cron: "7 11 * * 2-6"    # morning retry: picks up late closes and replaces a failed evening run
   workflow_dispatch:
 
 permissions:
@@ -20,23 +19,26 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
-      - name: Previous site (fallback prices if a download fails)
+      - name: Prices already published
         uses: actions/checkout@v4
         continue-on-error: true
         with:
           ref: site
           path: _prev
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Build the price database
-        run: python scripts/build_data.py --prev _prev
+      - name: Keep the published prices
+        run: |
+          if [ -f _prev/data/index.json ]; then
+            cp _prev/data/index.json site/data/
+            rm -rf site/data/prices && cp -r _prev/data/prices site/data/
+            echo "kept $(ls site/data/prices | wc -l) price files"
+          else
+            echo "no prices published yet — run scripts/publish_prices on your computer"
+          fi
 
       - name: Publish to the site branch
         env:
@@ -47,16 +49,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -q -m "Site build $(date -u +%Y-%m-%dT%H:%MZ) from ${GITHUB_SHA::7}"
+          git commit -q -m "Site code ${GITHUB_SHA::7} (prices kept)"
           git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" site
-
-      - name: Check the price download
-        run: |
-          python - <<'PY'
-          import json, sys
-          d = json.load(open("site/data/index.json"))
-          n, bad = len(d["tickers"]), len(d["failed"])
-          print(f"{n} tickers published, {bad} failed, last close {d['last_close']}")
-          if n == 0 or bad > n:
-              sys.exit("most price downloads failed — the site was published with old or missing prices")
-          PY

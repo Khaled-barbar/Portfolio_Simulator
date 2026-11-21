@@ -121,7 +121,7 @@ const Engine = (() => {
   const has = t => t === "CASH" || !!PRICES[t];
   function missingMsg(t) {
     return `${t}: not in this site's price database. Add it to scripts/tickers.txt in the GitHub repository ` +
-      `(System → Data has the link); it is available after the next daily price update.`;
+      `(System → Data has the link), then publish prices from your computer again.`;
   }
   async function ensure(t) {
     t = String(t || "").trim().toUpperCase();
@@ -599,7 +599,7 @@ const Engine = (() => {
     await loadPrices([...names]);
     for (const t of [...names].sort()) if (!PRICES[t]) {
       noteMissing(t);
-      warns.push(`${t}: not in this site's price database yet — kept; add it to scripts/tickers.txt so it can be tracked`);
+      warns.push(`${t}: not in this site's price database yet — kept; add it to scripts/tickers.txt and publish prices again so it can be tracked`);
     }
     const funds = Object.keys(alloc).filter(t => ["ETF", "MUTUALFUND", "CRYPTOCURRENCY"].includes((INDEX.tickers[t] || {}).y)).sort();
     for (const t of funds) warns.push(`${t}: is a fund, not a company — dropped from the allocation`);

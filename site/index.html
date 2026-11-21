@@ -800,17 +800,17 @@ function md(src){
 /* ---------- web version: texts, inbox, data page, start-up ---------- */
 Object.assign(I18N.ar,{
   title:"محاكي المحافظ",s_data:"البيانات",kpi_inbox:"آخر تحديث للأسعار",
-  overdue:n=>`${n} توقعات مرّ على موعد حسمها أكثر من 4 أيام ولم تُحسم (تنقص الأسعار؟) — تُحدَّث الأسعار تلقائياً كل يوم عمل؛ راجع «النظام ← البيانات».`,
+  overdue:n=>`${n} توقعات مرّ على موعد حسمها أكثر من 4 أيام ولم تُحسم (تنقص الأسعار؟) — انشر أسعاراً جديدة من جهازك (scripts/publish_prices)؛ راجع «النظام ← البيانات».`,
   paste_help:a=>`انسخ رد الوكيل كاملاً (${a}) والصقه هنا، واختر نوع الجلسة. يُستورد فوراً ويُحفظ في هذا المتصفح.`,
   failed_help:"صحّح الرد والصقه من جديد أعلاه.",processed:"تم استيراده",
   prompts_help2:"بعد أن يجيب كل وكيل، انسخ رده كاملاً والصقه في «النظام ← صندوق الردود» — اختر اسم الوكيل ونوع الجلسة الصحيحين.",
-  no_inv:"لا توجد بيانات أسعار بعد — تُبنى قاعدة الأسعار تلقائياً كل يوم عمل (GitHub Actions). راجع «النظام ← البيانات».",
+  no_inv:"لا توجد بيانات أسعار بعد — انشر الأسعار من جهازك (scripts/publish_prices). راجع «النظام ← البيانات».",
   pf_intro:"محافظك الخاصة: أضف عمليات شراء وبيع لأي شركة أو صندوق، وتابع أداءك مقارنة بمؤشر مرجعي يتلقى نفس إيداعاتك في نفس الأيام. تُحفظ بياناتك في هذا المتصفح فقط — خذ نسخة احتياطية من «النظام ← البيانات».",
   prices_at:d=>`الأسعار حتى ${d}`,no_prices_yet:"لا توجد أسعار بعد",
   data_title:"قاعدة الأسعار",data_updated:"آخر تحديث",data_last:"آخر إغلاق",data_n:"عدد الأوراق المالية",
-  data_failed:"تعذّر تنزيلها في آخر تحديث",data_auto:"تُحدَّث الأسعار تلقائياً كل يوم عمل بعد إغلاق الأسواق (أسعار إغلاق نهائية معدّلة تشمل التوزيعات، من Yahoo Finance).",
+  data_failed:"تعذّر تنزيلها في آخر تحديث",data_auto:"تُنشر الأسعار من جهازك: scripts/publish_prices.bat (Windows) أو publish_prices.sh ينزّلها من Yahoo Finance (أسعار إغلاق نهائية معدّلة تشمل التوزيعات) وينشر الموقع؛ ويمكن جدولته كل يوم عمل.",
   missing_title:"رموز مطلوبة غير موجودة في قاعدة الأسعار",
-  missing_help:"لإضافة أي شركة أو صندوق: أضف رمزه (بصيغة Yahoo Finance) سطراً جديداً في الملف scripts/tickers.txt على GitHub واحفظه؛ يُنشر الموقع من جديد خلال دقائق بالأسعار الجديدة.",
+  missing_help:"لإضافة أي شركة أو صندوق: أضف رمزه (بصيغة Yahoo Finance) سطراً جديداً في الملف scripts/tickers.txt، ثم انشر الأسعار من جهازك من جديد.",
   edit_list:"تعديل قائمة الرموز على GitHub ↗",run_update:"تشغيل التحديث الآن على GitHub ↗",copy_list:"نسخ الرموز",clear:"مسح",
   your_data:"بياناتك",local_note:"محافظك وردود الوكلاء وتواريخ المتابعة ولقطات المحافظ محفوظة في هذا المتصفح فقط (لا تُرسل إلى أي خادم). خذ نسخة احتياطية بانتظام، واستعدها لنقل بياناتك إلى متصفح أو جهاز آخر.",
   n_pf:"محافظ",n_tx:"عمليات",n_resp:"ردود الوكلاء",n_snap:"لقطات المحافظ",size:"الحجم",
@@ -823,17 +823,17 @@ Object.assign(I18N.ar,{
 });
 Object.assign(I18N.en,{
   title:"Portfolio Simulator",s_data:"Data",kpi_inbox:"Prices updated",
-  overdue:n=>`${n} forecasts are more than 4 days past their resolution date and still unresolved (missing prices?) — prices update automatically every weekday; see System → Data.`,
+  overdue:n=>`${n} forecasts are more than 4 days past their resolution date and still unresolved (missing prices?) — publish new prices from your computer (scripts/publish_prices); see System → Data.`,
   paste_help:a=>`Copy the agent's full reply (${a}), paste it here and pick the session type. It is imported immediately and saved in this browser.`,
   failed_help:"Fix the reply and paste it again above.",processed:"Imported",
   prompts_help2:"When each agent has replied, copy its full reply and paste it in System → Inbox — pick the right agent and session type.",
-  no_inv:"No price data yet — the price database is built automatically every weekday (GitHub Actions). See System → Data.",
+  no_inv:"No price data yet — publish prices from your computer (scripts/publish_prices). See System → Data.",
   pf_intro:"Your own portfolios: add buys and sells of any company or fund and track your performance against a benchmark that receives the same deposits on the same days. Your data is saved in this browser only — make backups in System → Data.",
   prices_at:d=>`prices to ${d}`,no_prices_yet:"no prices yet",
   data_title:"Price database",data_updated:"Last update",data_last:"Latest close",data_n:"Securities",
-  data_failed:"Could not be downloaded in the last update",data_auto:"Prices update automatically every weekday after the markets close (final adjusted closes including distributions, from Yahoo Finance).",
+  data_failed:"Could not be downloaded in the last update",data_auto:"Prices are published from your computer: scripts/publish_prices.bat (Windows) or publish_prices.sh downloads them from Yahoo Finance (final adjusted closes including distributions) and republishes the site; it can be scheduled every weekday.",
   missing_title:"Tickers you asked for that are not in the price database",
-  missing_help:"To add any company or fund: add its ticker (as Yahoo Finance writes it) as a new line in scripts/tickers.txt on GitHub and commit; the site is republished with the new prices within minutes.",
+  missing_help:"To add any company or fund: add its ticker (as Yahoo Finance writes it) as a new line in scripts/tickers.txt, then publish prices from your computer again.",
   edit_list:"Edit the ticker list on GitHub ↗",run_update:"Run the update now on GitHub ↗",copy_list:"Copy tickers",clear:"Clear",
   your_data:"Your data",local_note:"Your portfolios, agent replies, follow dates and holdings snapshots are stored in this browser only (nothing is sent to a server). Download a backup regularly, and restore it to move your data to another browser or device.",
   n_pf:"portfolios",n_tx:"transactions",n_resp:"agent replies",n_snap:"holdings snapshots",size:"size",
@@ -877,7 +877,7 @@ VIEWS["sys.data"]=async v=>{
      <div class="card kpi"><div class="v">${d.n}</div><div class="l">${T("data_n")}</div></div></div>
     <p class="muted">${T("data_auto")}</p>
     ${d.failed.length?`<p><span class="warn">${T("data_failed")}:</span> <span class="ltr">${esc(d.failed.join(", "))}</span></p>`:""}
-    ${gh?`<div class="row"><a class="btn sec" href="${gh}/edit/main/scripts/tickers.txt" target="_blank" rel="noopener">${T("edit_list")}</a><a class="btn sec" href="${gh}/actions/workflows/publish.yml" target="_blank" rel="noopener">${T("run_update")}</a></div>`:""}</div>
+    ${gh?`<div class="row"><a class="btn sec" href="${gh}/edit/main/scripts/tickers.txt" target="_blank" rel="noopener">${T("edit_list")}</a></div>`:""}</div>
    ${d.missing.length?`<div class="card"><h3>${T("missing_title")}</h3><p class="ltr"><b>${esc(d.missing.join("\n")).replace(/\n/g,"<br>")}</b></p>
     <p class="muted">${T("missing_help")}</p><div class="row"><button class="btn sec sm" id="mcopy">${T("copy_list")}</button><button class="btn sec sm" id="mclr">${T("clear")}</button><span id="mmsg" class="muted"></span></div></div>`:""}
    <div class="card"><h3>${T("your_data")}</h3><p class="note">${T("local_note")}</p>
