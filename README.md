@@ -92,6 +92,21 @@ The first time you push, Git asks you to sign in to GitHub. A browser window ope
 
 You can also just run `publish_prices` whenever you want fresh prices.
 
+## Password
+
+The site asks for a password on the first visit in each browser, then remembers it on that device.
+*System → Data → Sign out on this device* forgets it. `site/auth.json` holds only a salted
+PBKDF2-SHA256 hash, never the password itself.
+
+- **Change the password:** `python scripts/set_password.py`, then commit and push. The site is
+  republished automatically, and every browser asks for the new password once.
+- **Remove the password:** `python scripts/set_password.py --remove`, then commit and push.
+
+The site is static, so the check runs in the browser. It keeps casual visitors and bots out, and
+`robots.txt` plus a `noindex` tag keep the site out of search engines. It is not bank-grade security.
+Visitors can't change anything for other people: everything a visitor enters (replies, portfolios)
+stays in their own browser.
+
 ## Common tasks
 
 | Task | How |

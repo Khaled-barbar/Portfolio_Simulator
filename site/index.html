@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>Portfolio Simulator</title>
 <meta name="description" content="Paper-trading simulator: AI fund and stock picks scored with Brier, an investor copy simulator and your own portfolios in CAD.">
 <link rel="manifest" href="manifest.json">
@@ -96,6 +97,11 @@ svg.spark{display:block}
   th,td{padding:6px 5px;font-size:13px}.ac .list{min-width:0;width:92vw}.ac input{width:min(320px,80vw)!important}
   td.ltr{white-space:nowrap}.formgrid label{flex:1 1 140px}.formgrid input,.formgrid select{width:100%!important}.seg{flex-wrap:wrap}}
 a.btn,label.btn{text-decoration:none;display:inline-block}
+body.locked>header,body.locked>nav,body.locked>main{display:none}
+#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+#gate form{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 24px;width:100%;max-width:360px;text-align:center}
+#gate h2{margin:10px 0 4px}#gate input{width:100%;margin:14px 0 10px;padding:10px}#gate .btn{width:100%;padding:10px}
+#gate .gmsg{min-height:1.4em;margin:10px 0 0}#gate .gsmall{font-size:12.5px;margin:4px 0 0}
 </style>
 </head>
 <body>
@@ -111,6 +117,7 @@ a.btn,label.btn{text-decoration:none;display:inline-block}
 <nav id="sub"></nav>
 <nav id="items"></nav>
 <main id="view"></main>
+<script src="gate.js"></script>
 <script src="engine.js"></script>
 <script>
 /* ---------- translations: every visible UI string lives here ---------- */
@@ -819,7 +826,7 @@ Object.assign(I18N.ar,{
   reset:"حذف كل بياناتي من هذا المتصفح",confirm_reset:"حذف كل المحافظ والردود والإعدادات من هذا المتصفح؟ لا يمكن التراجع (إلا من نسخة احتياطية).",
   confirm_replace:"سيستبدل هذا كل البيانات الحالية في هذا المتصفح. متابعة؟",done:"تم ✓",
   imported_desk:r=>`تم الاستيراد ✓ — ${r.portfolios} محافظ، ${r.transactions} عمليات، ${r.responses} ردود.`,
-  activity:"سجل النشاط",show_text:"النص",load_failed:"تعذّر تحميل الموقع",
+  activity:"سجل النشاط",sign_out:"تسجيل الخروج من هذا الجهاز",show_text:"النص",load_failed:"تعذّر تحميل الموقع",
 });
 Object.assign(I18N.en,{
   title:"Portfolio Simulator",s_data:"Data",kpi_inbox:"Prices updated",
@@ -842,7 +849,7 @@ Object.assign(I18N.en,{
   reset:"Delete all my data from this browser",confirm_reset:"Delete every portfolio, reply and setting from this browser? This cannot be undone (except from a backup).",
   confirm_replace:"This replaces all current data in this browser. Continue?",done:"Done ✓",
   imported_desk:r=>`Imported ✓ — ${r.portfolios} portfolios, ${r.transactions} transactions, ${r.responses} replies.`,
-  activity:"Activity log",show_text:"Text",load_failed:"The site could not load",
+  activity:"Activity log",sign_out:"Sign out on this device",show_text:"Text",load_failed:"The site could not load",
 });
 I18N.ar.s_log=I18N.ar.s_data;I18N.en.s_log=I18N.en.s_data;
 
@@ -885,7 +892,7 @@ VIEWS["sys.data"]=async v=>{
     <div class="row"><button class="btn" id="bk">${T("backup")}</button>
      <label class="btn sec">${T("restore")}<input type="file" id="rs" accept=".json,application/json" hidden></label>
      <label class="btn sec">${T("import_desktop")}<input type="file" id="idb" accept=".db,.sqlite,.sqlite3" hidden></label>
-     <button class="btn danger" id="rst">${T("reset")}</button></div>
+     <button class="btn danger" id="rst">${T("reset")}</button><button class="btn sec" onclick="Gate.signOut()">${T("sign_out")}</button></div>
     <p class="muted">${T("import_help")}</p><p id="dmsg"></p></div>
    <div class="card"><h3>${T("activity")}</h3><pre id="logpre">${esc(d.log||T("no_log"))}</pre></div>`;
   const msg=(h,c="good")=>{$("#dmsg").innerHTML=`<span class="${c}">${h}</span>`};
@@ -933,7 +940,7 @@ window.addEventListener("storage",e=>{if(e.key==="ps_db_v1"&&CFG){Engine.reload(
 
 applyLang();
 parseHash();
-Engine.init().then(async()=>{CFG=await api("/api/config");applyLang();
+Gate.ready().then(()=>Engine.init()).then(async()=>{CFG=await api("/api/config");applyLang();
   if(!MENUS[R.m])R={m:"lab",s:"overview",i:null};
   if(R.m!=="pf"&&!MENUS[R.m].includes(R.s))R.s=MENUS[R.m][0];
   go(R.m,R.s,R.i)}).catch(e=>{console.error(e);$("#view").innerHTML=`<div class="card bad">${T("load_failed")}: ${esc(e.message||e)}</div>`});
