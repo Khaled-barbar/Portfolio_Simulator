@@ -178,7 +178,7 @@ def build(only=None, full=False):
     if (OUT / "index.json").is_file():
         prev_index = json.loads((OUT / "index.json").read_text(encoding="utf-8")).get("tickers", {})
     tickers = only or wanted()
-    index, failed, kept = {}, [], []
+    index, failed, kept = (dict(prev_index) if only else {}), [], []  # --only: update those, keep the rest
     refused = 0
 
     def one(t):

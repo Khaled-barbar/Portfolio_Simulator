@@ -570,7 +570,7 @@ VIEWS["inv.compare"]=async v=>{
     const lines=o.investors.filter(x=>INV_SEL.includes(x.id)).map(x=>({name:short(x.name),pts:x.series}))
       .concat(Object.entries(o.benchmarks).map(([b,d])=>({name:b,pts:d.series,dash:true,color:b===CFG.benchmark?"#444":"#999",width:1.4})));
     const th=(k2,l)=>`<th class="sort" data-k="${k2}">${l}${INV_SORT.k===k2?(INV_SORT.d>0?" ▲":" ▼"):""}</th>`;
-    $("#ibody").innerHTML=`<div class="card"><h3>${T("chart_compare")} <span class="muted ltr" style="font-weight:400">${esc(o.start)} → ${esc(o.end)}</span></h3>${lineChart(lines,{h:320})}</div>
+    $("#ibody").innerHTML=`<div class="card"><h3>${T("chart_compare")} <span class="muted ltr" style="font-weight:400;display:inline-block;white-space:nowrap">${esc(o.start)} → ${esc(o.end)}</span></h3>${lineChart(lines,{h:320})}</div>
     <div class="card"><div class="row"><span class="seg" id="ilist">${["","stocks","etf"].map(l=>`<button data-l="${l}" class="${INV_F.list===l?"on":""}">${T("list_"+(l||"all"))}</button>`).join("")}</span>
      <input id="iq" placeholder="${esc(T("search_name"))}" value="${esc(INV_F.q)}"></div>
      <div class="tablewrap"><table><tr><th>${T("in_chart")}</th>${th("name",T("th_investor"))}<th>${T("th_style")}</th>${th("score",T("th_score"))}<th>${T("th_verdict")}</th>
