@@ -145,7 +145,7 @@ ar:{
   n_forecasts:n=>`${n} توقع`,th_month:"الشهر",th_from:"من",th_to:"إلى",th_progress:"الأداء حتى الآن",
   vs:"مقابل",core_chip:"إلزامي",pending_cell:"معلّق",
   funds_title:"قائمة الصناديق المسموحة · المؤشر المرجعي:",th_fund:"الصندوق",th_last:"آخر سعر",th_date:"التاريخ",
-  th_1m:"شهر",th_3m:"3 أشهر",th_1y:"سنة",th_6m:"آخر 6 أشهر",bench_chip:"مرجعي",no_data:"لا بيانات",
+  th_1d:"يوم",th_5d:"5 أيام",th_1m:"شهر",th_3m:"3 أشهر",th_1y:"سنة",th_6m:"آخر 6 أشهر",bench_chip:"مرجعي",no_data:"لا بيانات",
   prices_note:"أسعار إغلاق نهائية معدّلة تشمل التوزيعات (Yahoo)؛ سعر اليوم يظهر بعد إغلاق السوق. CASH = عائد 0%.",stale:"قديم",
   core_title:"الأسئلة الإلزامية الشهرية",days:"يوماً",
   horizons_note:(h,n)=>`آفاق مسموحة: <span class="ltr">${h}</span> يوماً · حد أدنى ${n} توقعات لكل وكيل`,
@@ -180,7 +180,7 @@ ar:{
   inv_intro:"المستثمرون من «Investor-Watchlist-Final-2026-11». «النسخ» = شراء المراكز المعلنة بنفس أوزانها (بعد جعل مجموعها 100%) بالدولار الكندي مع رسوم تحويل العملة، وإعادة التوازن عند كل لقطة محفظة جديدة.",
   hindsight_note:"تنبيه: الفترات قبل أول لقطة محفوظة (2026-11-20) «ماذا لو» بأثر رجعي — تطبيق محفظة اليوم على الماضي، فتبدو أفضل من الواقع لأن الأسهم الحالية هي غالباً التي ارتفعت. السجل الحقيقي هو العمود «المنشور» وخط الورقة المدرجة إن وُجد. المتابعة الحقيقية تبدأ من «تاريخ المتابعة».",
   period:"الفترة:",p_follow:"منذ المتابعة",p_ytd:"منذ بداية السنة",p_1y:"سنة",p_3y:"3 سنوات",p_5y:"5 سنوات",p_10y:"10 سنوات",p_max:"الكل",p_custom:"مخصص",
-  p_1m:"شهر",p_3m:"3 أشهر",from_year:"من سنة",to_year:"إلى سنة",
+  p_1d:"يوم",p_5d:"5 أيام",p_1w:"أسبوع",p_6m:"6 أشهر",p_1m:"شهر",p_3m:"3 أشهر",from_year:"من سنة",to_year:"إلى سنة",
   copy_amount:"مبلغ النسخ (CAD)",list_all:"الكل",list_stocks:"أسهم",list_etf:"ETF",search_name:"بحث بالاسم…",
   th_investor:"المستثمر",th_list:"القائمة",th_style:"الأسلوب",th_score:"التقييم",th_verdict:"الحكم",
   th_reported5:"5 سنوات (منشور)",th_total:"عائد الفترة",th_cagr:"سنوي",th_maxdd:"أقصى تراجع",th_vs:"مقابل المرجع",
@@ -231,7 +231,7 @@ en:{
   n_forecasts:n=>`${n} forecasts`,th_month:"Month",th_from:"From",th_to:"To",th_progress:"Performance so far",
   vs:"vs",core_chip:"core",pending_cell:"pending",
   funds_title:"Allowed funds · Benchmark:",th_fund:"Fund",th_last:"Last price",th_date:"Date",
-  th_1m:"1M",th_3m:"3M",th_1y:"1Y",th_6m:"Last 6 months",bench_chip:"benchmark",no_data:"no data",
+  th_1d:"1D",th_5d:"5D",th_1m:"1M",th_3m:"3M",th_1y:"1Y",th_6m:"Last 6 months",bench_chip:"benchmark",no_data:"no data",
   prices_note:"Final adjusted closing prices including distributions (Yahoo); today's price appears after the market closes. CASH = 0% return.",stale:"stale",
   core_title:"Monthly core questions",days:"days",
   horizons_note:(h,n)=>`Allowed horizons: <span class="ltr">${h}</span> days · minimum ${n} forecasts per agent`,
@@ -264,7 +264,7 @@ The dashboard stops for a moment, and your data is backed up before anything cha
   inv_intro:"Investors from \"Investor-Watchlist-Final-2026-11\". \"Copy\" = buying the disclosed holdings at their weights (scaled to 100%) in CAD with FX fees, rebalancing at every new holdings snapshot.",
   hindsight_note:"Warning: periods before the first stored snapshot (2026-11-20) are a hindsight \"what-if\" — today's holdings applied to the past, which flatters the result because today's holdings are often the stocks that already went up. The real record is the \"Reported\" column and the listed-vehicle line where there is one. Real tracking starts on the \"follow date\".",
   period:"Period:",p_follow:"Since following",p_ytd:"YTD",p_1y:"1Y",p_3y:"3Y",p_5y:"5Y",p_10y:"10Y",p_max:"Max",p_custom:"Custom",
-  p_1m:"1M",p_3m:"3M",from_year:"From year",to_year:"To year",
+  p_1d:"1D",p_5d:"5D",p_1w:"1W",p_6m:"6M",p_1m:"1M",p_3m:"3M",from_year:"From year",to_year:"To year",
   copy_amount:"Copy amount (CAD)",list_all:"All",list_stocks:"Stocks",list_etf:"ETF",search_name:"Search by name…",
   th_investor:"Investor",th_list:"List",th_style:"Style",th_score:"Score",th_verdict:"Verdict",
   th_reported5:"5Y (reported)",th_total:"Period return",th_cagr:"CAGR",th_maxdd:"Max drawdown",th_vs:"vs benchmark",
@@ -366,7 +366,9 @@ function spark(pts,w=140,h=30){if(!pts||pts.length<2)return"";const v=pts.map(p=
 /* ---------- period selector ---------- */
 function periodRange(p,follow){
   const today=CFG.today,t=new Date(today),iso=d=>d.toISOString().slice(0,10),back=n=>iso(new Date(+t-n*864e5));
+  const backTD=n=>{const x=new Date((CFG.data&&CFG.data.last_close||today)+"T00:00:00Z");while(n>0){x.setUTCDate(x.getUTCDate()-1);const w=x.getUTCDay();if(w>0&&w<6)n--}return x.toISOString().slice(0,10)};
   switch(p.preset){case "follow":return [follow||today,today];case "ytd":return [today.slice(0,4)+"-01-01",today];
+    case "1d":return [backTD(1),today];case "5d":return [backTD(5),today];case "1w":return [back(7),today];case "6m":return [back(183),today];
     case "1m":return [back(31),today];case "3m":return [back(92),today];case "1y":return [back(365),today];case "3y":return [back(1096),today];
     case "5y":return [back(1826),today];case "10y":return [back(3652),today];case "max":return ["2016-01-04",today];
     case "custom":return [`${p.from}-01-01`,`${p.to}-12-31`<today?`${p.to}-12-31`:today];}
@@ -499,10 +501,11 @@ VIEWS["lab.prices"]=async v=>{
     return `<svg class="spark" width="${w}" height="${h}"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" points="${d}"/></svg>`};
   const core=CFG.core_forecasts.map(c=>`<li><span class="ltr">${esc(q(c))}</span> — ${c.horizon_days} ${T("days")}</li>`).join("");
   v.innerHTML=`<div class="card"><h3>${T("funds_title")} <span class="ltr">${esc(CFG.benchmark)}</span></h3>
-   <div class="tablewrap"><table><tr><th>${T("th_fund")}</th><th>${T("th_last")}</th><th>${T("th_date")}</th><th>${T("th_1m")}</th><th>${T("th_3m")}</th><th>${T("th_1y")}</th><th>${T("th_6m")}</th></tr>
+   <div class="tablewrap"><table><tr><th>${T("th_fund")}</th><th>${T("th_last")}</th><th>${T("th_date")}</th><th>${T("th_1d")}</th><th>${T("th_5d")}</th><th>${T("th_1m")}</th><th>${T("th_3m")}</th><th>${T("th_1y")}</th><th>${T("th_6m")}</th></tr>
    ${CFG.universe.map(t=>{const p=ps[t]||[];const l=p[p.length-1];const old=l&&(Date.now()-new Date(l[0]))>6*864e5;
      return `<tr><td class="ltr"><b>${esc(t)}</b>${t===CFG.benchmark?` <span class="chip">${T("bench_chip")}</span>`:""}</td>
      <td class="ltr">${t==="CASH"?"—":l?l[1].toFixed(2):T("no_data")}</td><td class="ltr${old?" bad":""}">${l?esc(l[0]):"—"}${old?` <span class="chip">${T("stale")}</span>`:""}</td>
+     ${[1,5].map(k=>{const r=p.length>k?p[p.length-1][1]/p[p.length-1-k][1]-1:null;return `<td class="ltr ${r==null?"muted":r>=0?"good":"bad"}">${pct(r)}</td>`}).join("")}
      ${[30,91,365].map(d=>{const r=ret(p,d);return `<td class="ltr ${r==null?"muted":r>=0?"good":"bad"}">${pct(r)}</td>`}).join("")}
      <td>${sp(p)}</td></tr>`}).join("")}</table></div>
    <p class="muted">${T("prices_note")}</p></div>
@@ -564,7 +567,7 @@ const verdictChip=v=>v?`<span class="chip ${v==="KEEP"?"goodc":"warnc"}">${esc(v
 VIEWS["inv.compare"]=async v=>{
   const [s,e]=periodRange(INVP);
   v.innerHTML=`<div class="note">${T("inv_intro")}</div><div class="note">${T("hindsight_note")}</div>
-   <div class="row">${periodBar("ip",INVP,["ytd","1y","3y","5y","10y","max","custom"],()=>{store("invp",INVP);render()})}
+   <div class="row">${periodBar("ip",INVP,["1d","5d","1w","1m","6m","ytd","1y","3y","5y","10y","max","custom"],()=>{store("invp",INVP);render()})}
    <label class="muted">${T("copy_amount")} <input type="number" id="iamt" value="${INVP.amount}" min="1"></label></div><div id="ibody"><p class="muted">${T("loading")}</p></div>`;
   $("#iamt").onchange=e=>{INVP.amount=+e.target.value||1000;store("invp",INVP);render()};
   const o=await api("/api/investors?"+qs({start:s,end:e,amount:INVP.amount}));
@@ -625,7 +628,7 @@ async function investorView(v){
        <div class="card kpi"><div class="v ltr bad">${pct(live.metrics.maxdd)}</div><div class="l">${T("th_maxdd")}</div></div></div>${lineChart([{name:T("copy_line"),pts:live.series}],{h:200})}`
        :`<p class="muted">${T("live_empty",esc(inv.follow_date))}</p>`}
      ${pfFromForm("ic","investor",inv.id)}</div>
-   <div class="row">${periodBar("id",INVD,["follow","ytd","1y","3y","5y","10y","max","custom"],()=>{store("invd",INVD);render()})}</div>
+   <div class="row">${periodBar("id",INVD,["follow","1d","5d","1w","1m","6m","ytd","1y","3y","5y","10y","max","custom"],()=>{store("invd",INVD);render()})}</div>
    ${d.hindsight?`<div class="note">${T("hindsight_note")}</div>`:""}
    <div class="grid">
     <div class="card kpi"><div class="v ltr ${cls(copy.total)}">${pct(copy.total)}</div><div class="l">${T("copy_line")} · ${T("th_total")}</div></div>
