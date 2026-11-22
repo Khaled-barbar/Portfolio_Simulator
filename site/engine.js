@@ -102,6 +102,7 @@ const Engine = (() => {
 
   async function loadOne(t) {
     if (t === "CASH" || t in PRICES) return;
+    if (!INDEX.tickers[t]) { PRICES[t] = null; return; } // not in the price database: no file to fetch
     try {
       const r = await fetch(`data/prices/${encodeURIComponent(fname(t))}.json?v=${encodeURIComponent(INDEX.updated || "0")}`);
       if (!r.ok) { PRICES[t] = null; return; }
