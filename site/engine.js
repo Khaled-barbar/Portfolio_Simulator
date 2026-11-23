@@ -882,8 +882,165 @@ CORE: CORE_JSON`;
   const appPrompt = (lab, agent) => (lab.track === "stocks" ? SYSTEM_STOCKS : SYSTEM) + "\n\n" +
     userPrompt(lab, "today's date (write it in session_date)", agent);
 
+  // ------------------------------------------------------------------ market briefing prompts (not scored, not part of the experiment)
+  const BRIEF = `You are AGENT_NAME, acting as a careful market analyst for one private investor.
+Today is DATE. The investor lives in Canada, invests in CAD through a Wealthsimple TFSA
+(10-20 year horizon, about 100 CAD per month on top of a diversified ETF core), and reads
+this briefing to understand the market, not to trade on it.
+
+QUESTION: What moved global and North American markets over the last 5 trading days, why,
+and what should this investor watch over the next 2-3 weeks?
+
+HOLDINGS AND WATCHLIST: TICKERS
+
+Rules
+1. Search the web for current information before answering. If you cannot browse, say so on
+   the first line and give the date your knowledge ends; do not guess at recent events.
+2. Every number (index level, % move, price, probability, earnings figure) needs a source
+   name and its publication date in brackets, e.g. [Reuters, 2026-11-21]. If you cannot
+   attribute a number, leave it out.
+3. Keep confirmed facts and speculation apart. A fact is reported by a primary source
+   (exchange, company release or filing, central bank, statistics agency) or a major outlet
+   (Reuters, Bloomberg, AP, WSJ, FT, CNBC, Globe and Mail). Rumours, single-source reports
+   and commentary go only in the "Unconfirmed / disputed" section, labelled as such.
+4. Check these at the source before writing about them, because they change fast and are
+   often wrong in summaries:
+   - rate expectations: market-implied odds (CME FedWatch for the Fed; OIS / market pricing
+     for the Bank of Canada) with their date, never your own estimate;
+   - leadership changes, IPOs, mergers, guidance: the company's own release or filing;
+   - scheduled dates (earnings, CPI, jobs, central-bank meetings): the official calendar.
+   If a story from earlier in the week was later reversed or corrected, say so.
+5. Canada first: cover the TSX and USD/CAD as well as US markets, and say how each point
+   affects a CAD investor (currency effect, Canadian-listed versions, TFSA rules where they
+   matter, e.g. 15% US withholding tax on US dividends inside a TFSA).
+6. Give each explanation of WHY something moved a confidence level (high / medium / low).
+   Several causes can be true at once: say which mattered most and why.
+7. Do not tell the investor to buy or sell. You may say what would change the picture
+   ("if X happens, Y becomes more likely").
+8. Plain language, short sentences, about 600 words at most.
+AGENT_NOTE
+Format: Markdown, with these headings in this order
+## Bottom line                      (3 sentences at most)
+## What happened                    (confirmed facts, each with [source, date])
+## Why (with confidence)
+## Unconfirmed / disputed
+## What it means for this portfolio  (one line per affected holding or watchlist ticker)
+## Dates to watch                   (table: date | event | why it matters)
+## Sources                          (publisher, title, date, link)
+End with this line exactly: "This is general information, not personalised financial advice."`;
+  const CROSSCHECK = `You are AGENT_NAME. Below are market briefings written today (DATE) by other AI
+analysts for the same investor (Canada, CAD, Wealthsimple TFSA). Check them; do not rewrite them.
+
+1. Disagreements: every factual claim where the briefings disagree with each other or with
+   what you can verify now. For each: the claim, who made it, what you find, your source
+   with its date, and a verdict (confirmed / wrong / cannot verify).
+2. Unsourced numbers: figures that have no source, or whose source you cannot find.
+3. Gaps: anything important that all of them missed (Canada and the CAD included).
+4. Combined summary: at most 6 lines, using only claims you marked confirmed.
+Same rules as the briefings: search the web, cite [source, date], keep facts and speculation
+apart, no buy/sell advice. End with this line exactly:
+"This is general information, not personalised financial advice."
+
+--- Briefing 1 (write which AI produced it) ---
+[paste here]
+
+--- Briefing 2 (write which AI produced it) ---
+[paste here]`;
+  const AGENT_NOTES = {
+    gemini: "9. Prefer a few verified numbers over many precise ones: a figure without [source, date] counts as an error.",
+    chatgpt: "9. For \"What happened\", prefer sources from the last 72 hours, and check that each one is still current.",
+    claude: "9. Your training data will not cover this week: search before you write, and say when a search found nothing.",
+  };
+  async function briefTickers() {
+    const ps = DB.portfolios.filter(p => !p.archived);
+    await loadPrices(ps.flatMap(pfTickers));
+    const book = new Book(), held = new Set();
+    for (const p of ps) for (const x of pfValue(p.id, null, book).positions) if (x.ticker !== "CASH" && x.qty > 0) held.add(x.ticker);
+    const watch = ((CONFIG.home || {}).watchlist || []).filter(t => !held.has(t));
+    return (held.size ? [...held].join(", ") + (watch.length ? "; watchlist: " : "") : watch.length ? "watchlist: " : "none listed") + watch.join(", ");
+  }
+  async function briefPrompts() {
+    const tk = await briefTickers(), td = today(), out = { brief: {}, crosscheck: {} };
+    for (const a of Object.keys(CONFIG.agents)) {
+      out.brief[a] = rep(BRIEF, [["AGENT_NAME", label(a)], ["DATE", td], ["TICKERS", tk], ["AGENT_NOTE", AGENT_NOTES[a] ? AGENT_NOTES[a] + "\n" : ""]]);
+      out.crosscheck[a] = rep(CROSSCHECK, [["AGENT_NAME", label(a)], ["DATE", td]]);
+    }
+    return out;
+  }
+  const label = a => ({ gemini: "Gemini", chatgpt: "ChatGPT", claude: "Claude" }[a] || a);
+
+  // ------------------------------------------------------------------ market home page
+  // perf: the same definitions as scripts/build_data.py perf_of() (top movers come from there)
+  function perfOf(t) {
+    const s = series(t), n = s.d.length;
+    if (n < 2) return null;
+    const a = s.a, last = a[n - 1], ld = s.d[n - 1];
+    const r = p => (p ? last / p - 1 : null);
+    const back = days => { const tg = addDays(ld, -days), i = bisectRight(s.d, tg) - 1; return i >= 0 && daysBetween(s.d[i], tg) <= 7 ? a[i] : null; };
+    const yi = bisectLeft(s.d, ld.slice(0, 4) + "-01-01") - 1;
+    let hi = -Infinity;
+    for (let i = bisectRight(s.d, addDays(ld, -365)); i < n; i++) hi = Math.max(hi, a[i]);
+    return { d1: r(a[n - 2]), d5: n > 5 ? r(a[n - 6]) : null, m1: r(back(30)), ytd: yi >= 0 ? r(a[yi]) : null, y1: r(back(365)),
+      off_high: hi > 0 && isFinite(hi) ? last / hi - 1 : null };
+  }
+  function quoteRow(t) {
+    const m = INDEX.tickers[t] || {}, s = series(t), n = s.d.length;
+    if (!n) return { ticker: t, name: m.n || null, missing: true };
+    const k = bisectLeft(s.d, addDays(s.d[n - 1], -92));
+    return { ticker: t, name: m.n || null, type: m.y || null, currency: m.c || null, last: s.r[n - 1], last_date: s.d[n - 1],
+      ...perfOf(t), spark: s.d.slice(k).map((d, i) => [d, s.a[k + i]]) };
+  }
+  function latestConsensus(track) {
+    const ss = DB.sessions.filter(s => s.track === track).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+    for (const s of ss) {
+      const rs = DB.responses.filter(r => r.session_id === s.id), c = rs.find(r => r.agent === "consensus");
+      if (!c) continue;
+      const others = rs.filter(r => r.agent !== "consensus");
+      const alloc = DB.allocations.filter(a => a.response_id === c.id).sort((a, b) => b.weight - a.weight).map(a => ({
+        ticker: a.ticker, weight: a.weight, name: (INDEX.tickers[a.ticker] || {}).n || null,
+        agents: others.filter(r => DB.allocations.some(x => x.response_id === r.id && x.ticker === a.ticker)).map(r => r.agent) }));
+      return { month: s.created_at.slice(0, 7), n_agents: others.length, allocation: alloc };
+    }
+    return null;
+  }
+  async function homeData() {
+    await resolveDue();
+    const home = CONFIG.home || {}, indices = home.indices || ["^GSPTSE", "^GSPC", "^IXIC", "^VIX", "XEQT.TO"];
+    const market = await getJSON(`data/market.json?v=${encodeURIComponent(INDEX.updated || "0")}`, null);
+    // holdings across all open portfolios, valued in CAD
+    const ps = DB.portfolios.filter(p => !p.archived);
+    await loadPrices(ps.flatMap(pfTickers));
+    const book = new Book(), held = {};
+    let total = 0;
+    for (const p of ps) for (const x of pfValue(p.id, null, book).positions) {
+      if (x.ticker === "CASH" || !(x.qty > 0)) continue;
+      const h = held[x.ticker] = held[x.ticker] || { value: 0, cost: 0, portfolios: [] };
+      h.value += x.value || 0; h.cost += x.cost || 0; h.portfolios.push(p.name); total += x.value || 0;
+    }
+    const watch = (home.watchlist || []).filter(t => !held[t]);
+    await loadPrices(indices.concat(Object.keys(held), watch));
+    const holdings = Object.entries(held).sort((a, b) => b[1].value - a[1].value).map(([t, h]) =>
+      ({ ...quoteRow(t), value: h.value, weight: total ? h.value / total : null, gain: h.value - h.cost, portfolios: h.portfolios }));
+    const universe = [];
+    if (market && market.perf)
+      for (const [t, p] of Object.entries(market.perf)) {
+        const m = INDEX.tickers[t] || {};
+        if (t.startsWith("^") || m.y === "INDEX") continue;
+        universe.push({ ticker: t, name: m.n || null, type: m.y || null, currency: m.c || null,
+          d1: p[0], d5: p[1], m1: p[2], ytd: p[3], y1: p[4], off_high: p[5] });
+      }
+    const sb = {};
+    for (const t of tracks()) sb[t] = scoreboard(t);
+    return { today: today(), last_close: INDEX.last_close, prices_updated: INDEX.updated,
+      market_updated: market ? market.updated : null, indices: indices.map(quoteRow), holdings, total,
+      watchlist: watch.map(quoteRow), universe, trending: (market && market.trending) || [], news: (market && market.news) || [],
+      consensus: { etf: latestConsensus("etf"), stocks: tracks().includes("stocks") ? latestConsensus("stocks") : null },
+      scoreboard: sb, session_day: CONFIG.lab.session_day || 20 };
+  }
+
   // ------------------------------------------------------------------ GET handlers
   const G = {};
+  G.home = homeData;
   G.config = () => {
     const s = trackCfg("stocks"), lab = CONFIG.lab;
     return { agents: CONFIG.agents, benchmark: lab.benchmark, universe: lab.universe, horizons_days: lab.horizons_days,
@@ -986,10 +1143,10 @@ CORE: CORE_JSON`;
     return { markdown: txt };
   };
   G.inbox = () => ({ pending: [], processed: DB.inbox.filter(x => !x.error).slice(-50).reverse(), failed: DB.inbox.filter(x => x.error).reverse() });
-  G.prompts = () => {
+  G.prompts = async () => {
     const out = {};
     for (const t of tracks()) { out[t] = {}; for (const a of manualAgents()) out[t][a] = appPrompt(trackCfg(t), a); }
-    return out;
+    return Object.assign(out, await briefPrompts());
   };
   G.log = () => ({ text: DB.log.slice(-300).join("\n") });
   G.investors = investorsOverview;

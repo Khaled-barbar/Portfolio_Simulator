@@ -69,6 +69,7 @@ pre{white-space:pre-wrap;direction:ltr;text-align:left;background:var(--chip);pa
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.cards>*,.agents>*{min-width:0}
 details summary{cursor:pointer;color:var(--muted)}
 .md h1{font-size:20px}.md h2{font-size:16px;margin-top:22px}
 .md blockquote{margin:8px 0;padding:6px 12px;border-inline-start:3px solid var(--warn);color:var(--muted)}
@@ -386,9 +387,9 @@ function periodBar(key,p,presets,onchange){
 }
 
 /* ---------- navigation: menu → sub-tab → item (investor / portfolio) ---------- */
-const MENUS={lab:["overview","sessions","forecasts","prices"],picks:["recs","perf","sessions","forecasts"],
+const MENUS={home:["market"],lab:["overview","sessions","forecasts","prices"],picks:["recs","perf","sessions","forecasts"],
   inv:["compare","stocks","etf"],pf:["all","new"],sys:["inbox","prompts","report","data"]};
-let R=load("route",{m:"lab",s:"overview",i:null});
+let R=load("route",{m:"home",s:"market",i:null});
 function parseHash(){const h=location.hash.slice(1).split("/").map(decodeURIComponent);
   if(h[0]&&MENUS[h[0]])R={m:h[0],s:h[1]||MENUS[h[0]][0],i:h[2]||null}}
 function go(m,s,i){R={m,s:s||MENUS[m][0],i:i??null};store("route",R);
@@ -399,7 +400,7 @@ async function drawNav(){
   document.querySelectorAll("#menu button").forEach(b=>b.onclick=()=>go(b.dataset.m,load("sub_"+b.dataset.m,null)));
   let subs=MENUS[R.m];
   if(R.m==="pf"){PF_LIST=PF_LIST||await api("/api/portfolios");subs=["all",...PF_LIST.map(p=>"p"+p.id),"new"]}
-  $("#sub").innerHTML=subs.map(s=>{const lbl=s[0]==="p"&&R.m==="pf"&&/^p\d+$/.test(s)?esc((PF_LIST.find(p=>"p"+p.id===s)||{}).name):T("s_"+s);
+  $("#sub").innerHTML=subs.length<2?"":subs.map(s=>{const lbl=s[0]==="p"&&R.m==="pf"&&/^p\d+$/.test(s)?esc((PF_LIST.find(p=>"p"+p.id===s)||{}).name):T("s_"+s);
     return `<button data-s="${s}" class="${s===R.s?"on":""}">${lbl}</button>`}).join("");
   document.querySelectorAll("#sub button").forEach(b=>b.onclick=()=>{store("sub_"+R.m,b.dataset.s);go(R.m,b.dataset.s,R.m==="inv"?load("inv_"+b.dataset.s,null):null)});
   $("#items").innerHTML="";
@@ -783,7 +784,7 @@ VIEWS["sys.inbox"]=async v=>{
 VIEWS["sys.prompts"]=async v=>{
   const p=await api("/api/prompts");
   v.innerHTML=`<div class="card"><p>${T("prompts_help1")}</p><p class="muted">${T("prompts_help2")}</p></div>`+
-   Object.keys(p).map(t=>`<h3>${T("prompts_"+t)}</h3>`+Object.keys(p[t]).map(a=>{const k=t+"-"+a;return `<div class="card"><div class="row"><h3 style="margin:0">${ag(a)}</h3><span class="chip">${T("track_"+t)}</span><button class="btn sec" data-c="${esc(k)}">${T("copy")}</button><span class="muted" id="c-${esc(k)}"></span></div><details><summary>…</summary><pre id="p-${esc(k)}">${esc(p[t][a])}</pre></details></div>`}).join("")).join("");
+   Object.keys(p).map(t=>`<h3>${T("prompts_"+t)}</h3>`+(t==="brief"||t==="crosscheck"?`<div class="note">${T("help_"+t)}</div>`:"")+Object.keys(p[t]).map(a=>{const k=t+"-"+a;return `<div class="card"><div class="row"><h3 style="margin:0">${ag(a)}</h3><span class="chip">${T("track_"+t)}</span><button class="btn sec" data-c="${esc(k)}">${T("copy")}</button><span class="muted" id="c-${esc(k)}"></span></div><details><summary>…</summary><pre id="p-${esc(k)}">${esc(p[t][a])}</pre></details></div>`}).join("")).join("");
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=async()=>{const k=b.dataset.c,[t,a]=k.split("-");
     try{await navigator.clipboard.writeText(p[t][a]);$("#c-"+k).textContent=T("copied")}catch(e){
       const pre=$("#p-"+k);pre.closest("details").open=true;const r=document.createRange();r.selectNodeContents(pre);getSelection().removeAllRanges();getSelection().addRange(r);$("#c-"+k).textContent=T("selected")}});
@@ -925,6 +926,156 @@ async function readLabDb(file){
   return rows;
 }
 
+/* ---------- market home page ---------- */
+Object.assign(I18N.ar,{
+  m_home:"السوق",s_market:"السوق اليوم",
+  h_indices:"المؤشرات الرئيسية",h_notes:"ملاحظات سريعة",h_holdings:"أداء ممتلكاتك",h_watch:"قائمة المتابعة",
+  h_movers:"الأكثر حركة في قاعدة الأسعار",h_gainers:"الأكثر ارتفاعاً",h_losers:"الأكثر انخفاضاً",h_trending:"الأكثر تداولاً على Yahoo Finance",
+  h_news:"آخر أخبار السوق",h_consensus:"ما اتفق عليه الوكلاء",h_brief:"اسأل الوكلاء عن السوق",
+  stocks_only:"أسهم",etfs_only:"صناديق ETF",th_off_high:"عن أعلى سعر في 52 أسبوعاً",th_weight:"الوزن",th_last:"آخر سعر",
+  th_ticker:"الرمز",region_US:"أمريكا",region_CA:"كندا",
+  holdings_none:"لا توجد ممتلكات بعد — أضف محفظة في «محافظي». هذه قائمة المتابعة من config.json.",
+  market_none:"لا توجد بيانات للأخبار والأكثر تداولاً بعد — تظهر بعد أول نشر للأسعار من جهازك (scripts/publish_prices).",
+  as_of:(c,u)=>`أسعار الإغلاق حتى ${c}. الأخبار والأكثر تداولاً حتى ${u}.`,
+  brief_text:"اطلب من Claude وGemini وChatGPT ملخصاً للسوق بنفس النص: حقائق مؤكدة مع مصدر وتاريخ، منفصلة عن التكهنات، مع التركيز على كندا. ثم استخدم نص «التحقق المتقاطع» لمقارنة إجاباتهم.",
+  open_prompts:"نصوص الملخص ←",
+  disclaimer:"معلومات عامة للتعلّم والمحاكاة فقط، وليست نصيحة مالية شخصية. الملاحظات قواعد ثابتة مبنية على الأسعار، وليست توقعات. الأسعار من Yahoo Finance وقد تتأخر يوماً.",
+  n_vix_hi:v=>`التقلّب مرتفع جداً (VIX ${v}). الحركات اليومية الكبيرة في الاتجاهين طبيعية في هذه الحالة — لا تبنِ قراراً على يوم واحد.`,
+  n_vix_mid:v=>`التقلّب أعلى من المعتاد (VIX ${v}).`,n_vix_lo:v=>`السوق هادئ (VIX ${v}).`,
+  n_dd:(n,x,k)=>`${n} أقل بـ ${x} من أعلى مستوى في 52 أسبوعاً — ${k}.`,dd_bear:"منطقة سوق هابطة (أكثر من 20%)",dd_corr:"منطقة تصحيح (أكثر من 10%)",dd_pull:"تراجع محدود",
+  n_fx:(x,up)=>up?`الدولار الأمريكي ارتفع ${x} مقابل الكندي خلال شهر: الأصول الأمريكية تبدو أفضل بالدولار الكندي منها بالأمريكي.`:`الدولار الأمريكي انخفض ${x} مقابل الكندي خلال شهر: هذا يخفض قيمة الأصول الأمريكية بالدولار الكندي.`,
+  n_hold_dd:l=>`بعيدة عن قمتها بأكثر من 20%: ${l}. راجع إن كانت أسباب شرائها لا تزال قائمة.`,
+  n_conc:(t,w)=>`${t} يشكّل ${w} من ممتلكاتك — تركّز مرتفع في ورقة واحدة.`,
+  n_run:l=>`ارتفعت أكثر من 50% خلال سنة: ${l}. تحقق أن وزنها لا يزال ضمن ما تريده.`,
+  n_agree:(m,tr,l)=>`في جلسة ${m} (${tr}) اتفق كل الوكلاء على: ${l}.`,
+  n_best:(a,b,n)=>`الأفضل معايرةً حتى الآن: ${a} (Brier ${b} على ${n} توقعات؛ 0.25 = بلا ميزة).`,
+  n_next:(d,n)=>`الجلسة الشهرية القادمة يوم ${d} (بعد ${n} أيام): انسخ النصوص من «النظام ← النصوص المجدولة».`,
+  n_today:"الجلسة الشهرية اليوم: انسخ النصوص من «النظام ← النصوص المجدولة».",
+  agents_n:(k,n)=>`${k} من ${n}`,
+  prompts_brief:"ملخص السوق (غير مُقيَّم)",prompts_crosscheck:"التحقق المتقاطع بين الوكلاء (غير مُقيَّم)",
+  track_brief:"ملخص",track_crosscheck:"تحقق",
+  help_brief:"ليست جزءاً من التجربة ولا تُلصق في صندوق الردود. استخدمها متى شئت لفهم السوق: النص نفسه للوكلاء الثلاثة (مع سطر واحد خاص بكل وكيل)، ويُحدَّث تلقائياً بتاريخ اليوم وممتلكاتك.",
+  help_crosscheck:"بعد أن تحصل على ملخصين أو ثلاثة: الصق ملخصات الوكيلين الآخرين في هذا النص وأعطه للوكيل الثالث. يعطيك قائمة بنقاط الخلاف والأرقام بلا مصدر وما فاتهم.",
+});
+Object.assign(I18N.en,{
+  m_home:"Market",s_market:"Market today",
+  h_indices:"Major indices",h_notes:"Quick notes",h_holdings:"Your holdings",h_watch:"Watchlist",
+  h_movers:"Top movers in the price database",h_gainers:"Gainers",h_losers:"Losers",h_trending:"Trending on Yahoo Finance",
+  h_news:"Latest market news",h_consensus:"What the agents agreed on",h_brief:"Ask the agents about the market",
+  stocks_only:"Stocks",etfs_only:"ETFs",th_off_high:"From 52-week high",th_weight:"Weight",th_last:"Last",
+  th_ticker:"Ticker",region_US:"US",region_CA:"Canada",
+  holdings_none:"No holdings yet — add a portfolio in My portfolios. Showing the watchlist from config.json.",
+  market_none:"No news or trending data yet — it appears after the first price publish from your computer (scripts/publish_prices).",
+  as_of:(c,u)=>`Closing prices to ${c}. News and trending as of ${u}.`,
+  brief_text:"Ask Claude, Gemini and ChatGPT for a market briefing with the same prompt: confirmed facts with source and date, kept apart from speculation, Canada first. Then use the cross-check prompt to compare their answers.",
+  open_prompts:"Briefing prompts →",
+  disclaimer:"General information for learning and paper trading only, not personalised financial advice. The notes are fixed rules applied to prices, not forecasts. Prices come from Yahoo Finance and can be a day old.",
+  n_vix_hi:v=>`Volatility is very high (VIX ${v}). Big daily swings in both directions are normal in this state — don't base a decision on a single day.`,
+  n_vix_mid:v=>`Volatility is above normal (VIX ${v}).`,n_vix_lo:v=>`Markets are calm (VIX ${v}).`,
+  n_dd:(n,x,k)=>`${n} is ${x} below its 52-week high — ${k}.`,dd_bear:"bear-market territory (over 20%)",dd_corr:"correction territory (over 10%)",dd_pull:"a pullback",
+  n_fx:(x,up)=>up?`The US dollar rose ${x} against the CAD over a month: US holdings look better in CAD than in USD.`:`The US dollar fell ${x} against the CAD over a month: that lowers the CAD value of US holdings.`,
+  n_hold_dd:l=>`More than 20% below their 52-week high: ${l}. Check that your reasons for owning them still hold.`,
+  n_conc:(t,w)=>`${t} is ${w} of your holdings — a lot in one security.`,
+  n_run:l=>`Up more than 50% over a year: ${l}. Check that the weight is still what you want.`,
+  n_agree:(m,tr,l)=>`In the ${m} session (${tr}) every agent included: ${l}.`,
+  n_best:(a,b,n)=>`Best calibrated so far: ${a} (Brier ${b} on ${n} forecasts; 0.25 = no edge).`,
+  n_next:(d,n)=>`Next monthly session on the ${d}th (in ${n} days): copy the prompts from System → Prompts.`,
+  n_today:"The monthly session is today: copy the prompts from System → Prompts.",
+  agents_n:(k,n)=>`${k} of ${n}`,
+  prompts_brief:"Market briefing (not scored)",prompts_crosscheck:"Cross-check between agents (not scored)",
+  track_brief:"briefing",track_crosscheck:"cross-check",
+  help_brief:"Not part of the experiment, and not pasted in the Inbox. Use them whenever you want to understand the market: the same prompt for all three agents (plus one line for each), filled in with today's date and your holdings.",
+  help_crosscheck:"Once you have two or three briefings: paste the other two agents' briefings into this prompt and give it to the third agent. It lists the disagreements, the unsourced numbers and what they all missed.",
+});
+const IDX_NAMES={"^GSPTSE":"S&P/TSX","^GSPC":"S&P 500","^IXIC":"Nasdaq","^DJI":"Dow Jones","^VIX":"VIX","USDCAD=X":"USD/CAD","^RUT":"Russell 2000"};
+const idxName=r=>IDX_NAMES[r.ticker]||r.ticker;
+let HOME=load("home",{by:"d1",type:"EQUITY"});
+const safeUrl=u=>/^https?:\/\//i.test(String(u||""))?u:null;
+function fmtTime(sec){if(!sec)return"";const d=new Date(sec*1000);return isNaN(d)?"":d.toLocaleString(LANG==="ar"?"ar":"en-CA",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
+function tkCell(t,n){return `<td><b class="ltr">${esc(IDX_NAMES[t]||t)}</b>${n?`<div class="muted" style="font-size:12.5px">${esc(n)}</div>`:""}</td>`}
+function perfTable(rows,{weight=false}={}){
+  if(!rows.length)return `<p class="muted">${T("no_data")}</p>`;
+  const offc=x=>x==null?"muted":x<=-0.2?"bad":x<=-0.1?"warn":"muted";
+  return `<div class="tablewrap"><table><tr><th>${T("th_ticker")}</th>${weight?`<th>${T("th_weight")}</th>`:""}<th>${T("th_last")}</th><th>${T("th_1d")}</th><th>${T("th_5d")}</th><th>${T("th_1m")}</th><th>${T("p_ytd")}</th><th>${T("th_1y")}</th><th>${T("th_off_high")}</th><th></th></tr>`+
+   rows.map(r=>r.missing?`<tr>${tkCell(r.ticker,r.name)}<td colspan="${weight?9:8}" class="muted">${T("no_data")}</td></tr>`:`<tr>${tkCell(r.ticker,r.name)}${weight?`<td class="ltr">${pctp(r.weight,0)}</td>`:""}
+    <td class="ltr">${num(r.last)} <span class="muted">${esc(r.currency||"")}</span></td>
+    ${["d1","d5","m1","ytd","y1"].map(k=>`<td class="ltr ${cls(r[k])}">${pct(r[k])}</td>`).join("")}
+    <td class="ltr ${offc(r.off_high)}">${pct(r.off_high)}</td><td>${spark(r.spark,110,26)}</td></tr>`).join("")+`</table></div>`;
+}
+function homeNotes(h){
+  const out=[],I=Object.fromEntries(h.indices.filter(r=>!r.missing).map(r=>[r.ticker,r]));
+  const vix=I["^VIX"];
+  if(vix){const v=num(vix.last,1);out.push(vix.last>=30?["bad",T("n_vix_hi",v)]:vix.last>=20?["warn",T("n_vix_mid",v)]:["good",T("n_vix_lo",v)])}
+  for(const t of ["^GSPC","^GSPTSE","^IXIC"]){const r=I[t];if(!r||r.off_high==null||r.off_high>-0.05)continue;
+    const k=r.off_high<=-0.2?"dd_bear":r.off_high<=-0.1?"dd_corr":"dd_pull";
+    out.push([r.off_high<=-0.1?"warn":"muted",T("n_dd",idxName(r),pctp(-r.off_high),T(k))])}
+  const fx=I["USDCAD=X"];if(fx&&fx.m1!=null&&Math.abs(fx.m1)>=0.02)out.push(["muted",T("n_fx",pctp(Math.abs(fx.m1)),fx.m1>0)]);
+  const H=h.holdings.filter(r=>!r.missing);
+  const dd=H.filter(r=>r.off_high!=null&&r.off_high<=-0.2).map(r=>`${r.ticker} (${pct(r.off_high,0)})`);
+  if(dd.length)out.push(["warn",T("n_hold_dd",dd.join(", "))]);
+  for(const r of H)if(r.weight>0.25&&H.length>1)out.push(["warn",T("n_conc",r.ticker,pctp(r.weight,0))]);
+  const run=H.filter(r=>r.y1!=null&&r.y1>0.5).map(r=>`${r.ticker} (${pct(r.y1,0)})`);
+  if(run.length)out.push(["muted",T("n_run",run.join(", "))]);
+  for(const tr of ["etf","stocks"]){const c=h.consensus[tr];if(!c||c.n_agents<2)continue;
+    const all=c.allocation.filter(a=>a.ticker!=="CASH"&&a.agents.length===c.n_agents).map(a=>a.ticker);
+    if(all.length)out.push(["muted",T("n_agree",c.month,T("track_"+tr),all.join(", "))])}
+  let best=null;for(const [a,v] of Object.entries(h.scoreboard.etf||{}))if(a!=="consensus"&&v.all_n>=8&&v.all_brier!=null&&(!best||v.all_brier<best[1].all_brier))best=[a,v];
+  if(best)out.push(["muted",T("n_best",label(best[0]),best[1].all_brier.toFixed(3),best[1].all_n)]);
+  const day=+h.today.slice(8,10),sd=h.session_day;
+  if(day===sd)out.push(["good",T("n_today")]);
+  else{const t=new Date(h.today+"T00:00:00Z"),n=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+(day>sd?1:0),sd));out.push(["muted",T("n_next",sd,Math.round((n-t)/864e5))])}
+  return out;
+}
+function moversHtml(h){
+  const u=h.universe.filter(r=>r.type===HOME.type&&r[HOME.by]!=null).sort((a,b)=>b[HOME.by]-a[HOME.by]);
+  if(!u.length)return `<p class="muted">${T("market_none")}</p>`;
+  const list=rs=>`<div class="tablewrap"><table>${rs.map(r=>`<tr>${tkCell(r.ticker,r.name)}<td class="ltr ${cls(r[HOME.by])}">${pct(r[HOME.by])}</td><td class="muted">${T("p_ytd")} <span class="ltr">${pct(r.ytd,0)}</span></td></tr>`).join("")}</table></div>`;
+  const n=Math.min(8,Math.floor(u.length/2)),top=u.slice(0,n),bot=u.slice(u.length-n).reverse();
+  return `<div class="cards"><div><h3 class="good">${T("h_gainers")}</h3>${list(top)}</div><div><h3 class="bad">${T("h_losers")}</h3>${list(bot)}</div></div>`;
+}
+VIEWS["home.market"]=async v=>{
+  const h=await api("/api/home");
+  const idx=h.indices.filter(r=>!r.missing).map(r=>`<div class="card kpi"><div class="l">${esc(idxName(r))}</div>
+    <div class="v ltr">${num(r.last,r.last<10?4:2)}</div><div><span class="ltr ${r.ticker==="^VIX"?(r.d1>0?"bad":"good"):cls(r.d1)}">${pct(r.d1,2)}</span> <span class="muted">${T("th_1d")}</span></div>
+    <div class="muted" style="font-size:12.5px">${T("th_5d")} <span class="ltr">${pct(r.d5)}</span> · ${T("p_ytd")} <span class="ltr">${pct(r.ytd)}</span></div>${spark(r.spark,150,30)}</div>`).join("");
+  const notes=homeNotes(h).map(([c,t])=>`<div class="${c==="muted"?"":c}" style="margin:4px 0">• ${esc(t)}</div>`).join("");
+  const hasH=h.holdings.length>0;
+  const trend=h.trending.length?`<div class="tablewrap"><table><tr><th>${T("th_ticker")}</th><th></th><th>${T("th_last")}</th><th>${T("th_1d")}</th><th>${T("th_1m")}</th><th></th></tr>${h.trending.map(r=>`<tr>${tkCell(r.t,r.n)}
+     <td><span class="chip">${T("region_"+r.region)}</span> <span class="chip">${esc(r.y==="ETF"?"ETF":r.y==="EQUITY"?T("stocks_only"):r.y||"")}</span></td>
+     <td class="ltr">${num(r.p)} <span class="muted">${esc(r.c||"")}</span></td><td class="ltr ${cls(r.d1)}">${pct(r.d1)}</td><td class="ltr ${cls(r.m1)}">${pct(r.m1)}</td>
+     <td>${spark((r.s||[]).map((x,i)=>[i,x]),110,26)}</td></tr>`).join("")}</table></div>`:`<p class="muted">${T("market_none")}</p>`;
+  const news=h.news.length?h.news.slice(0,14).map(n=>{const u=safeUrl(n.link);return `<div style="padding:8px 0;border-bottom:1px solid var(--line)">
+     ${u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none">${esc(n.title)}</a>`:`<b>${esc(n.title)}</b>`}
+     <div class="muted" style="font-size:12.5px">${esc(n.publisher||"")} · <span class="ltr">${esc(fmtTime(n.time))}</span> ${(n.tickers||[]).map(t=>`<span class="chip ltr">${esc(IDX_NAMES[t]||t)}</span>`).join(" ")}</div></div>`}).join(""):`<p class="muted">${T("market_none")}</p>`;
+  const cons=["etf","stocks"].map(tr=>{const c=h.consensus[tr];if(!c)return"";
+    return `<div><h3>${T("track_"+tr)} <span class="chip ltr">${esc(c.month)}</span></h3><div class="tablewrap"><table>${c.allocation.slice(0,8).map(a=>`<tr>${tkCell(a.ticker,a.name)}<td class="ltr">${pctp(a.weight,0)}</td><td><div class="bar"><i style="width:${Math.round(a.weight*100)}%"></i></div></td>
+      <td class="muted">${T("agents_n",a.agents.length,c.n_agents)}</td></tr>`).join("")}</table></div></div>`}).join("");
+  v.innerHTML=`
+  <p class="muted">${T("as_of",`<span class="ltr">${esc(h.last_close||"—")}</span>`,`<span class="ltr">${esc(h.market_updated?h.market_updated.slice(0,16).replace("T"," ")+" UTC":"—")}</span>`)}</p>
+  <div class="grid">${idx}</div>
+  <div class="cards">
+   <div class="card"><h3>${T("h_notes")}</h3>${notes}</div>
+   <div class="card"><h3>${T("h_brief")}</h3><p>${T("brief_text")}</p><button class="btn" onclick="go('sys','prompts')">${T("open_prompts")}</button></div>
+  </div>
+  <div class="card"><h3>${hasH?T("h_holdings"):T("h_watch")}</h3>${hasH?"":`<p class="muted">${T("holdings_none")}</p>`}${perfTable(hasH?h.holdings:h.watchlist,{weight:hasH})}</div>
+  <div class="card"><div class="row"><h3 style="margin:0">${T("h_movers")}</h3>
+    <span class="seg" id="mv-type">${[["EQUITY","stocks_only"],["ETF","etfs_only"]].map(([k,l])=>`<button data-k="${k}" class="${HOME.type===k?"on":""}">${T(l)}</button>`).join("")}</span>
+    <span class="seg" id="mv-by">${["d1","d5","m1","ytd"].map(k=>`<button data-k="${k}" class="${HOME.by===k?"on":""}">${T({d1:"th_1d",d5:"th_5d",m1:"th_1m",ytd:"p_ytd"}[k])}</button>`).join("")}</span></div>
+    <div id="movers">${moversHtml(h)}</div></div>
+  <div class="cards">
+   <div class="card"><h3>${T("h_news")}</h3>${news}</div>
+   <div class="card"><h3>${T("h_trending")}</h3>${trend}</div>
+  </div>
+  ${cons?`<div class="card"><h3>${T("h_consensus")}</h3><div class="cards">${cons}</div><p class="muted">${T("caveat")}</p></div>`:""}
+  <div class="note">${T("disclaimer")}</div>`;
+  const bind=()=>{document.querySelectorAll("#mv-type button").forEach(b=>b.onclick=()=>{HOME.type=b.dataset.k;store("home",HOME);redraw()});
+    document.querySelectorAll("#mv-by button").forEach(b=>b.onclick=()=>{HOME.by=b.dataset.k;store("home",HOME);redraw()})};
+  const redraw=()=>{$("#movers").innerHTML=moversHtml(h);
+    document.querySelectorAll("#mv-type button").forEach(b=>b.classList.toggle("on",b.dataset.k===HOME.type));
+    document.querySelectorAll("#mv-by button").forEach(b=>b.classList.toggle("on",b.dataset.k===HOME.by))};
+  bind();
+};
+
 /* ---------- header ---------- */
 function runstate(){}
 function applyLang(){
@@ -942,9 +1093,10 @@ window.addEventListener("hashchange",()=>{parseHash();render()});
 window.addEventListener("storage",e=>{if(e.key==="ps_db_v1"&&CFG){Engine.reload().then(()=>{INV_LIST=PF_LIST=PICKS=null;render()})}});
 
 applyLang();
+if(!location.hash)R={m:"home",s:"market",i:null};
 parseHash();
 Gate.ready().then(()=>Engine.init()).then(async()=>{CFG=await api("/api/config");applyLang();
-  if(!MENUS[R.m])R={m:"lab",s:"overview",i:null};
+  if(!MENUS[R.m])R={m:"home",s:"market",i:null};
   if(R.m!=="pf"&&!MENUS[R.m].includes(R.s))R.s=MENUS[R.m][0];
   go(R.m,R.s,R.i)}).catch(e=>{console.error(e);$("#view").innerHTML=`<div class="card bad">${T("load_failed")}: ${esc(e.message||e)}</div>`});
 </script>
