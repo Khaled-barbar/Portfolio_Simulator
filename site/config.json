@@ -42,5 +42,9 @@
       {"kind": "outperform", "ticker_a": "SHOP.TO", "ticker_b": "XIU.TO", "horizon_days": 180}
     ]
   },
-  "always_fetch": ["SPY", "AOR", "URTH", "XIU.TO", "XEQT.TO"]
+  "always_fetch": ["SPY", "AOR", "URTH", "XIU.TO", "XEQT.TO"],
+  "home": {
+    "indices": ["^GSPTSE", "^GSPC", "^IXIC", "^DJI", "^VIX", "XEQT.TO", "USDCAD=X"],
+    "watchlist": ["NVDA", "MSFT", "AAPL", "SHOP.TO", "RY.TO", "VFV.TO", "ZQQ.TO"]
+  }
 }

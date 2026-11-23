@@ -6,6 +6,11 @@ Simulator for ETF and stock portfolios. This is the website version of
 
 It has the same dashboard as the desktop app, in Arabic and English:
 
+- **Market (home page):** major indices (S&P/TSX, S&P 500, Nasdaq, Dow, VIX, USD/CAD), the performance of
+  your holdings (or the watchlist in `site/config.json`), top movers in the price database, Yahoo Finance's
+  trending tickers for the US and Canada, the latest market headlines, short rule-based notes (volatility,
+  drawdowns, concentration, what the agents agreed on) and a link to the market-briefing prompts.
+  News and trending tickers are fetched by `publish_prices` together with the prices, so no API key is needed.
 - **Fund lab (AI)** and **Stock picks (AI):** paste the monthly replies from Gemini, ChatGPT and Claude.
   Each reply's forecasts are resolved automatically and scored with the Brier score. Each allocation is
   tracked as a paper portfolio in CAD after the FX fee.
@@ -13,7 +18,9 @@ It has the same dashboard as the desktop app, in Arabic and English:
   filters, follow dates and your own holdings snapshots.
 - **My portfolios:** your own portfolios with buys, sells, deposits and withdrawals. Each one is compared
   with a benchmark that gets the same deposits.
-- **System:** inbox for pasting replies, prompts, report, and **Data** (price database, backup, restore,
+- **System:** inbox for pasting replies, prompts (the scored experiment prompts, plus a *market briefing*
+  and a *cross-check* prompt that are not scored: facts with dated sources kept apart from speculation,
+  Canada first, confidence levels, no buy/sell advice), report, and **Data** (price database, backup, restore,
   import from the desktop app).
 
 ## How it works
@@ -115,6 +122,7 @@ stays in their own browser.
 | Refresh prices now | Run `scripts/publish_prices.bat` (or `.sh`) |
 | Re-download every ticker's full history | `python scripts/build_data.py --full --publish` |
 | Change experiment settings (fund list, core questions, stock-pick limits) | Edit `site/config.json`. **Don't change it during a running experiment**, because the prompts must stay the same every month. |
+| Change the indices or watchlist on the Market page | Edit `home.indices` / `home.watchlist` in `site/config.json`, then run `publish_prices` (the experiment is not affected). |
 | Update the investor list | Replace `site/data/investors.json` (same format as the desktop app). |
 | Test locally | `python scripts/build_data.py` then `cd site && python -m http.server 8000` and open http://localhost:8000 |
 

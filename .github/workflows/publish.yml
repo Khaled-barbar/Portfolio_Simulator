@@ -34,6 +34,7 @@ jobs:
         run: |
           if [ -f _prev/data/index.json ]; then
             cp _prev/data/index.json site/data/
+            if [ -f _prev/data/market.json ]; then cp _prev/data/market.json site/data/; fi
             rm -rf site/data/prices && cp -r _prev/data/prices site/data/
             echo "kept $(ls site/data/prices | wc -l) price files"
           else

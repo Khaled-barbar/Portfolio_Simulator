@@ -13,6 +13,10 @@ After the first run, only the last few weeks are downloaded per ticker (site/dat
 cache, ignored by git on main); the whole history is downloaded again when a new dividend or split
 changed the adjusted prices.
 
+Market page: after the prices, data/market.json is written with the returns of every security in the
+database (for the top movers), Yahoo's trending tickers (US and Canada) and recent market headlines.
+If that part fails, the prices are still published.
+
 Tickers: everything the app uses (site/config.json, site/data/investors.json), every line of
 scripts/tickers.txt, and the exchange rate <CUR>CAD=X of every non-CAD currency.
 If a download fails, the ticker's previous data is kept.
@@ -57,6 +61,8 @@ def wanted():
     for c in cfg["lab"].get("core_forecasts", []) + st.get("core_forecasts", []):
         t |= {c["ticker_a"], c.get("ticker_b")}
     t |= set(cfg.get("always_fetch", []))
+    home = cfg.get("home", {})
+    t |= set(home.get("indices", [])) | set(home.get("watchlist", []))
     for i in inv["investors"]:
         t |= {h["ticker"] for h in i["holdings"]} | set(i.get("benchmarks", [])) | {i.get("proxy")}
     f = ROOT / "scripts" / "tickers.txt"
@@ -232,6 +238,102 @@ def build(only=None, full=False):
     return out
 
 
+# ---------------------------------------------------------------- market page (data/market.json)
+NEWS_QUERIES = ["stock market", "S&P 500", "TSX", "Nasdaq", "Federal Reserve", "Bank of Canada"]
+TRENDING_REGIONS = ["US", "CA"]
+
+
+def _back(ds, a, days):
+    """Adjusted close on or before (last date - days), or None if the history is too short."""
+    target = (date.fromisoformat(ds[-1]) - timedelta(days=days)).isoformat()
+    for i in range(len(ds) - 1, -1, -1):
+        if ds[i] <= target:
+            return a[i] if (date.fromisoformat(target) - date.fromisoformat(ds[i])).days <= 7 else None
+    return None
+
+
+def perf_of(rows):
+    """[1D, 5D, 1M, YTD, 1Y, distance from the 52-week high] from {date: (adj, raw)}; the same
+    definitions as the site's engine.js (G.home)."""
+    ds = sorted(rows)
+    if len(ds) < 2:
+        return None
+    a = [rows[d][0] for d in ds]
+    last = a[-1]
+    r = lambda p: None if not p else round(last / p - 1, 5)
+    ytd_ref = None
+    y0 = f"{ds[-1][:4]}-01-01"
+    for i in range(len(ds) - 1, -1, -1):
+        if ds[i] < y0:
+            ytd_ref = a[i]
+            break
+    year = [x for d, x in zip(ds, a) if d > (date.fromisoformat(ds[-1]) - timedelta(days=365)).isoformat()]
+    return [r(a[-2]), r(a[-6]) if len(a) > 5 else None, r(_back(ds, a, 30)), r(ytd_ref), r(_back(ds, a, 365)),
+            round(last / max(year) - 1, 5) if year else None]
+
+
+def safe_link(u):
+    return u if isinstance(u, str) and re.match(r"^https?://", u) else None
+
+
+def market(index):
+    out = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds"), "perf": {}, "trending": [], "news": []}
+    for t, m in index.items():
+        if t.endswith("=X") or m.get("y") == "CURRENCY":
+            continue
+        rows = read(t)
+        p = perf_of(rows) if rows else None
+        if p:
+            out["perf"][t] = p
+    seen = set()
+    for region in TRENDING_REGIONS:
+        try:
+            qs = get(f"https://query1.finance.yahoo.com/v1/finance/trending/{region}?count=12")["finance"]["result"][0]["quotes"]
+        except Exception as e:
+            say(f"  trending {region}: {e}")
+            continue
+        for q in qs:
+            t = str(q.get("symbol") or "").upper()
+            if not TICKER_RE.match(t) or t in seen or t.endswith("=X") or t.endswith("=F"):
+                continue
+            seen.add(t)
+            try:
+                res = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(t)}?range=2mo&interval=1d")["chart"]["result"][0]
+                meta = res.get("meta", {})
+                closes = [c for c in (res["indicators"]["quote"][0].get("close") or []) if c is not None]
+                price = meta.get("regularMarketPrice") or (closes[-1] if closes else None)
+                prev = meta.get("chartPreviousClose")
+                prev_day = closes[-2] if len(closes) > 1 else None
+                ch = lambda p: None if not (price and p) else round(price / p - 1, 5)
+                out["trending"].append({"t": t, "region": region, "n": meta.get("longName") or meta.get("shortName"),
+                                        "y": meta.get("instrumentType"), "c": meta.get("currency"), "p": price,
+                                        "d1": ch(prev_day), "m1": ch(closes[-22] if len(closes) > 21 else prev),
+                                        "s": [round(x, 4) for x in closes[-30:]]})
+            except Exception as e:
+                say(f"  trending {t}: {e}")
+            time.sleep(0.3)
+    news = {}
+    for q in NEWS_QUERIES:
+        try:
+            items = get(f"https://query1.finance.yahoo.com/v1/finance/search?q={urllib.parse.quote(q)}"
+                        f"&quotesCount=0&newsCount=8")["news"]
+        except Exception as e:
+            say(f"  news '{q}': {e}")
+            continue
+        for n in items:
+            link = safe_link(n.get("link"))
+            key = n.get("uuid") or link
+            if not link or not n.get("title") or key in news:
+                continue
+            news[key] = {"title": n["title"], "publisher": n.get("publisher"), "link": link,
+                         "time": n.get("providerPublishTime"),
+                         "tickers": [x for x in (n.get("relatedTickers") or []) if TICKER_RE.match(str(x))][:6]}
+        time.sleep(0.3)
+    out["news"] = sorted(news.values(), key=lambda n: -(n["time"] or 0))[:24]
+    (OUT / "market.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    say(f"market page: {len(out['perf'])} securities, {len(out['trending'])} trending, {len(out['news'])} headlines")
+
+
 def git(*args, cwd=ROOT, check=True):
     return subprocess.run(["git", *args], cwd=cwd, check=check, text=True, capture_output=True)
 
@@ -283,6 +385,10 @@ def main():
         out = build(a.only.split(",") if a.only else None, a.full)
         if not out["tickers"]:
             sys.exit("no price data at all — is Yahoo Finance reachable?")
+        try:
+            market(out["tickers"])
+        except Exception as e:  # the market page is optional: never block the price publish
+            say(f"market page not updated: {e}")
     if a.publish:
         publish()
 
