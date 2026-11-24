@@ -309,18 +309,35 @@ REPORTS`;
         "or a company network may be blocking it: try a private window or another browser.");
     }
     const j = await r.json().catch(() => ({}));
-    if (!r.ok && !(method === "GET" && r.status === 404)) {
-      const why = r.status === 401 ? "the token is wrong or expired" : r.status === 403 || r.status === 404 ? "the token cannot write to this repository (it needs Contents: Read and write)" : j.message || r.status;
-      throw new Error(`GitHub: ${why}`);
-    }
+    if (!r.ok && !(method === "GET" && r.status === 404)) throw new Error(ghError(r.status, j.message, method));
     return r.ok ? j : null;
+  }
+  // What GitHub said, plus what to do about it
+  function ghError(status, msg, method) {
+    const m = String(msg || ""), said = `GitHub ${status}${m ? `: “${m}”` : ""}`;
+    let hint = "";
+    if (status === 401) hint = "the token is wrong, expired or was regenerated: paste it again in Admin → Settings.";
+    else if (/rule|protected branch|pull request/i.test(m))
+      hint = "a branch protection rule or ruleset on main blocks direct commits. In the repository: Settings → Rules (or Branches), allow your account to bypass it, or remove the rule.";
+    else if (/not accessible|permission|forbidden/i.test(m) || status === 403 || (status === 404 && method !== "GET"))
+      hint = "the token itself lacks write access to the files. Open the token on GitHub (Settings → Developer settings → Fine-grained tokens), check that this repository is selected and that Repository permissions → Contents is “Read and write”, press Update, then try again (no need to paste it again).";
+    return hint ? `${said} — ${hint}` : said;
   }
   async function testToken() {
     const g = gh.get(), repo = await ghFetch("GET", "");
-    if (repo && repo.permissions && repo.permissions.push === false) throw new Error("GitHub: this token can read but not write the repository");
-    if (!repo) throw new Error(`GitHub: repository ${g.repo} not found for this token`);
+    if (!repo) throw new Error(`GitHub: repository ${g.repo} not found for this token (is it selected in the token's repository access?)`);
     const branch = g.branch || repo.default_branch;
     if (branch === "site") throw new Error('use the branch "main": "site" is rebuilt on every publish, so a briefing written there would be lost');
+    // repo.permissions describes the ACCOUNT, not a fine-grained token, so probe a write that cannot succeed:
+    // updating README.md with a wrong sha returns 409 when the token may write, 403/404 when it may not.
+    const f = await ghFetch("GET", `contents/README.md?ref=${encodeURIComponent(branch)}`);
+    if (!f) throw new Error(`GitHub: branch "${branch}" or its README.md not found`);
+    try {
+      await ghFetch("PUT", "contents/README.md", { message: "write check (never applied)", branch, sha: "0".repeat(40), content: (f.content || "").replace(/\n/g, "") });
+    } catch (e) {
+      if (/^GitHub 409/.test(e.message)) return { repo: repo.full_name, branch };
+      throw e;
+    }
     return { repo: repo.full_name, branch };
   }
   async function publish(data) {
