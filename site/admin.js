@@ -296,9 +296,18 @@ REPORTS`;
   async function ghFetch(method, path, body) {
     const g = gh.get();
     if (!g.token || !g.repo) throw new Error("add a GitHub token in Admin → Settings first");
-    const r = await fetch(`https://api.github.com/repos/${g.repo}/${path}`, {
-      method, headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${g.token}`, "X-GitHub-Api-Version": "2022-11-28",
-        ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    const repo = g.repo.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/i, "").replace(/^\/+|\/+$/g, "");
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error(`"${g.repo}" is not owner/repository`);
+    if (!/^[\x21-\x7e]+$/.test(g.token)) throw new Error("the token contains spaces or unusual characters: paste it again");
+    let r;
+    try {
+      r = await fetch(`https://api.github.com/repos/${repo}${path ? "/" + path : ""}`, {
+        method, cache: "no-store", headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${g.token}`,
+          ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    } catch (e) {
+      throw new Error("could not reach api.github.com (" + (e.message || e) + "). A browser extension (ad or privacy blocker) " +
+        "or a company network may be blocking it: try a private window or another browser.");
+    }
     const j = await r.json().catch(() => ({}));
     if (!r.ok && !(method === "GET" && r.status === 404)) {
       const why = r.status === 401 ? "the token is wrong or expired" : r.status === 403 || r.status === 404 ? "the token cannot write to this repository (it needs Contents: Read and write)" : j.message || r.status;
@@ -308,9 +317,11 @@ REPORTS`;
   }
   async function testToken() {
     const g = gh.get(), repo = await ghFetch("GET", "");
+    if (repo && repo.permissions && repo.permissions.push === false) throw new Error("GitHub: this token can read but not write the repository");
     if (!repo) throw new Error(`GitHub: repository ${g.repo} not found for this token`);
-    if (repo.permissions && !repo.permissions.push) throw new Error("GitHub: this token can read but not write the repository");
-    return { repo: repo.full_name, branch: g.branch || repo.default_branch };
+    const branch = g.branch || repo.default_branch;
+    if (branch === "site") throw new Error('use the branch "main": "site" is rebuilt on every publish, so a briefing written there would be lost');
+    return { repo: repo.full_name, branch };
   }
   async function publish(data) {
     const g = gh.get(), branch = g.branch || "main";
