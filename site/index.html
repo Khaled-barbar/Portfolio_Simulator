@@ -120,6 +120,7 @@ body.locked>header,body.locked>nav,body.locked>main{display:none}
 <main id="view"></main>
 <script src="gate.js"></script>
 <script src="engine.js"></script>
+<script src="admin.js"></script>
 <script>
 /* ---------- translations: every visible UI string lives here ---------- */
 const I18N={
@@ -388,7 +389,7 @@ function periodBar(key,p,presets,onchange){
 
 /* ---------- navigation: menu → sub-tab → item (investor / portfolio) ---------- */
 const MENUS={home:["market"],lab:["overview","sessions","forecasts","prices"],picks:["recs","perf","sessions","forecasts"],
-  inv:["compare","stocks","etf"],pf:["all","new"],sys:["inbox","prompts","report","data"]};
+  inv:["compare","stocks","etf"],pf:["all","new"],sys:["inbox","prompts","report","data"],admin:["briefing","settings"]};
 let R=load("route",{m:"home",s:"market",i:null});
 function parseHash(){const h=location.hash.slice(1).split("/").map(decodeURIComponent);
   if(h[0]&&MENUS[h[0]])R={m:h[0],s:h[1]||MENUS[h[0]][0],i:h[2]||null}}
@@ -784,7 +785,7 @@ VIEWS["sys.inbox"]=async v=>{
 VIEWS["sys.prompts"]=async v=>{
   const p=await api("/api/prompts");
   v.innerHTML=`<div class="card"><p>${T("prompts_help1")}</p><p class="muted">${T("prompts_help2")}</p></div>`+
-   Object.keys(p).map(t=>`<h3>${T("prompts_"+t)}</h3>`+(t==="brief"||t==="crosscheck"?`<div class="note">${T("help_"+t)}</div>`:"")+Object.keys(p[t]).map(a=>{const k=t+"-"+a;return `<div class="card"><div class="row"><h3 style="margin:0">${ag(a)}</h3><span class="chip">${T("track_"+t)}</span><button class="btn sec" data-c="${esc(k)}">${T("copy")}</button><span class="muted" id="c-${esc(k)}"></span></div><details><summary>…</summary><pre id="p-${esc(k)}">${esc(p[t][a])}</pre></details></div>`}).join("")).join("");
+   Object.keys(p).map(t=>`<h3>${T("prompts_"+t)}</h3>`+Object.keys(p[t]).map(a=>{const k=t+"-"+a;return `<div class="card"><div class="row"><h3 style="margin:0">${ag(a)}</h3><span class="chip">${T("track_"+t)}</span><button class="btn sec" data-c="${esc(k)}">${T("copy")}</button><span class="muted" id="c-${esc(k)}"></span></div><details><summary>…</summary><pre id="p-${esc(k)}">${esc(p[t][a])}</pre></details></div>`}).join("")).join("");
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=async()=>{const k=b.dataset.c,[t,a]=k.split("-");
     try{await navigator.clipboard.writeText(p[t][a]);$("#c-"+k).textContent=T("copied")}catch(e){
       const pre=$("#p-"+k);pre.closest("details").open=true;const r=document.createRange();r.selectNodeContents(pre);getSelection().removeAllRanges();getSelection().addRange(r);$("#c-"+k).textContent=T("selected")}});
@@ -937,8 +938,8 @@ Object.assign(I18N.ar,{
   holdings_none:"لا توجد ممتلكات بعد — أضف محفظة في «محافظي». هذه قائمة المتابعة من config.json.",
   market_none:"لا توجد بيانات للأخبار والأكثر تداولاً بعد — تظهر بعد أول نشر للأسعار من جهازك (scripts/publish_prices).",
   as_of:(c,u)=>`أسعار الإغلاق حتى ${c}. الأخبار والأكثر تداولاً حتى ${u}.`,
-  brief_text:"اطلب من Claude وGemini وChatGPT ملخصاً للسوق بنفس النص: حقائق مؤكدة مع مصدر وتاريخ، منفصلة عن التكهنات، مع التركيز على كندا. ثم استخدم نص «التحقق المتقاطع» لمقارنة إجاباتهم.",
-  open_prompts:"نصوص الملخص ←",
+  brief_text:"اجمع معلومات السوق من ChatGPT وGemini وClaude بنص واحد، ثم اطلب من وكيل واحد مقارنتها وإخراج نسخة نهائية بصيغة JSON تُلصق في «الإدارة» لتظهر هنا.",
+  open_prompts:"الإدارة ← ملخص السوق",
   disclaimer:"معلومات عامة للتعلّم والمحاكاة فقط، وليست نصيحة مالية شخصية. الملاحظات قواعد ثابتة مبنية على الأسعار، وليست توقعات. الأسعار من Yahoo Finance وقد تتأخر يوماً.",
   n_vix_hi:v=>`التقلّب مرتفع جداً (VIX ${v}). الحركات اليومية الكبيرة في الاتجاهين طبيعية في هذه الحالة — لا تبنِ قراراً على يوم واحد.`,
   n_vix_mid:v=>`التقلّب أعلى من المعتاد (VIX ${v}).`,n_vix_lo:v=>`السوق هادئ (VIX ${v}).`,
@@ -952,10 +953,6 @@ Object.assign(I18N.ar,{
   n_next:(d,n)=>`الجلسة الشهرية القادمة يوم ${d} (بعد ${n} أيام): انسخ النصوص من «النظام ← النصوص المجدولة».`,
   n_today:"الجلسة الشهرية اليوم: انسخ النصوص من «النظام ← النصوص المجدولة».",
   agents_n:(k,n)=>`${k} من ${n}`,
-  prompts_brief:"ملخص السوق (غير مُقيَّم)",prompts_crosscheck:"التحقق المتقاطع بين الوكلاء (غير مُقيَّم)",
-  track_brief:"ملخص",track_crosscheck:"تحقق",
-  help_brief:"ليست جزءاً من التجربة ولا تُلصق في صندوق الردود. استخدمها متى شئت لفهم السوق: النص نفسه للوكلاء الثلاثة (مع سطر واحد خاص بكل وكيل)، ويُحدَّث تلقائياً بتاريخ اليوم وممتلكاتك.",
-  help_crosscheck:"بعد أن تحصل على ملخصين أو ثلاثة: الصق ملخصات الوكيلين الآخرين في هذا النص وأعطه للوكيل الثالث. يعطيك قائمة بنقاط الخلاف والأرقام بلا مصدر وما فاتهم.",
 });
 Object.assign(I18N.en,{
   m_home:"Market",s_market:"Market today",
@@ -967,8 +964,8 @@ Object.assign(I18N.en,{
   holdings_none:"No holdings yet — add a portfolio in My portfolios. Showing the watchlist from config.json.",
   market_none:"No news or trending data yet — it appears after the first price publish from your computer (scripts/publish_prices).",
   as_of:(c,u)=>`Closing prices to ${c}. News and trending as of ${u}.`,
-  brief_text:"Ask Claude, Gemini and ChatGPT for a market briefing with the same prompt: confirmed facts with source and date, kept apart from speculation, Canada first. Then use the cross-check prompt to compare their answers.",
-  open_prompts:"Briefing prompts →",
+  brief_text:"Collect market information from ChatGPT, Gemini and Claude with one prompt, then have one agent cross-check them into a final JSON that you paste in Admin to show it here.",
+  open_prompts:"Admin → Market briefing",
   disclaimer:"General information for learning and paper trading only, not personalised financial advice. The notes are fixed rules applied to prices, not forecasts. Prices come from Yahoo Finance and can be a day old.",
   n_vix_hi:v=>`Volatility is very high (VIX ${v}). Big daily swings in both directions are normal in this state — don't base a decision on a single day.`,
   n_vix_mid:v=>`Volatility is above normal (VIX ${v}).`,n_vix_lo:v=>`Markets are calm (VIX ${v}).`,
@@ -982,10 +979,6 @@ Object.assign(I18N.en,{
   n_next:(d,n)=>`Next monthly session on the ${d}th (in ${n} days): copy the prompts from System → Prompts.`,
   n_today:"The monthly session is today: copy the prompts from System → Prompts.",
   agents_n:(k,n)=>`${k} of ${n}`,
-  prompts_brief:"Market briefing (not scored)",prompts_crosscheck:"Cross-check between agents (not scored)",
-  track_brief:"briefing",track_crosscheck:"cross-check",
-  help_brief:"Not part of the experiment, and not pasted in the Inbox. Use them whenever you want to understand the market: the same prompt for all three agents (plus one line for each), filled in with today's date and your holdings.",
-  help_crosscheck:"Once you have two or three briefings: paste the other two agents' briefings into this prompt and give it to the third agent. It lists the disagreements, the unsourced numbers and what they all missed.",
 });
 const IDX_NAMES={"^GSPTSE":"S&P/TSX","^GSPC":"S&P 500","^IXIC":"Nasdaq","^DJI":"Dow Jones","^VIX":"VIX","USDCAD=X":"USD/CAD","^RUT":"Russell 2000"};
 const idxName=r=>IDX_NAMES[r.ticker]||r.ticker;
@@ -1050,12 +1043,16 @@ VIEWS["home.market"]=async v=>{
   const cons=["etf","stocks"].map(tr=>{const c=h.consensus[tr];if(!c)return"";
     return `<div><h3>${T("track_"+tr)} <span class="chip ltr">${esc(c.month)}</span></h3><div class="tablewrap"><table>${c.allocation.slice(0,8).map(a=>`<tr>${tkCell(a.ticker,a.name)}<td class="ltr">${pctp(a.weight,0)}</td><td><div class="bar"><i style="width:${Math.round(a.weight*100)}%"></i></div></td>
       <td class="muted">${T("agents_n",a.agents.length,c.n_agents)}</td></tr>`).join("")}</table></div></div>`}).join("");
-  v.innerHTML=`
+  const isAdmin=await Admin.signedIn(),loc=isAdmin?Admin.localPreview.get():null;
+  const useLoc=loc&&(!h.briefing||String(loc.generated_at||"")>String(h.briefing.generated_at||""));
+  const brief=useLoc?loc:h.briefing&&Admin.check(h.briefing).data;
+  v.innerHTML=`${brief?briefingHtml(brief,{today:h.today,preview:useLoc}):isAdmin?`<div class="note">${T("b_none_admin")} <button class="link" onclick="go('admin','briefing')">${T("open_prompts")}</button></div>`:""}
+  ${brief?`<h2 style="font-size:17px;margin:22px 0 10px">${T("h_pricedb")}</h2>`:""}
   <p class="muted">${T("as_of",`<span class="ltr">${esc(h.last_close||"—")}</span>`,`<span class="ltr">${esc(h.market_updated?h.market_updated.slice(0,16).replace("T"," ")+" UTC":"—")}</span>`)}</p>
   <div class="grid">${idx}</div>
   <div class="cards">
    <div class="card"><h3>${T("h_notes")}</h3>${notes}</div>
-   <div class="card"><h3>${T("h_brief")}</h3><p>${T("brief_text")}</p><button class="btn" onclick="go('sys','prompts')">${T("open_prompts")}</button></div>
+   <div class="card"><h3>${T("h_brief")}</h3><p>${T("brief_text")}</p><button class="btn" onclick="go('admin','briefing')">${T("open_prompts")}</button></div>
   </div>
   <div class="card"><h3>${hasH?T("h_holdings"):T("h_watch")}</h3>${hasH?"":`<p class="muted">${T("holdings_none")}</p>`}${perfTable(hasH?h.holdings:h.watchlist,{weight:hasH})}</div>
   <div class="card"><div class="row"><h3 style="margin:0">${T("h_movers")}</h3>
@@ -1074,6 +1071,212 @@ VIEWS["home.market"]=async v=>{
     document.querySelectorAll("#mv-type button").forEach(b=>b.classList.toggle("on",b.dataset.k===HOME.type));
     document.querySelectorAll("#mv-by button").forEach(b=>b.classList.toggle("on",b.dataset.k===HOME.by))};
   bind();
+};
+
+/* ---------- AI market briefing (home page) and admin area ---------- */
+Object.assign(I18N.ar,{
+  m_admin:"الإدارة",s_briefing:"ملخص السوق",s_settings:"الإعدادات",
+  h_pricedb:"من قاعدة الأسعار",b_title:"ملخص السوق اليوم",b_preview:"معاينة على هذا الجهاز فقط — لم يُنشر بعد",
+  b_stale:n=>`هذا الملخص عمره ${n} أيام.`,b_by:"المصادر",b_editor:"راجعه",
+  b_indicators:"مؤشرات السوق",b_notes:"ملاحظات سريعة",b_holdings:"ممتلكاتك وقائمة المتابعة",b_gainers:"الأكثر ارتفاعاً",b_losers:"الأكثر انخفاضاً",
+  b_news:"أخبار السوق",b_calendar:"مواعيد قادمة",b_unconfirmed:"غير مؤكد أو مختلف عليه",b_disagree:"نقاط خلاف بين الوكلاء",b_sources:"المصادر",
+  b_why_cad:"للمستثمر بالدولار الكندي:",mood_risk_on:"إقبال على المخاطرة",mood_risk_off:"عزوف عن المخاطرة",mood_mixed:"مختلط",
+  conf_high:"ثقة عالية",conf_medium:"ثقة متوسطة",conf_low:"ثقة منخفضة",
+  b_none_admin:"لا يوجد ملخص سوق منشور بعد.",
+  b_disclaimer:"جمعه ودقّقه ذكاء اصطناعي من مصادر على الإنترنت؛ قد يحتوي أخطاء. معلومات عامة وليست نصيحة مالية شخصية.",
+  ad_title:"منطقة الإدارة",ad_pw:"كلمة مرور الإدارة",ad_go:"دخول",ad_bad:"كلمة المرور غير صحيحة.",ad_out:"خروج من الإدارة",
+  ad_nopw:"لم تُضبط كلمة مرور الإدارة بعد. على جهازك شغّل: python scripts/set_password.py --admin ثم انشر التغيير (git commit و git push).",
+  ad_lock:"حماية بسيطة داخل المتصفح (الموقع ثابت). النشر نفسه يحتاج رمز GitHub محفوظاً في متصفحك فقط.",
+  st1:"١. اجمع المعلومات — نفس النص لـ ChatGPT وGemini وClaude",
+  st1_help:"انسخ هذا النص والصقه كما هو في محادثة جديدة لدى كل وكيل، مع تفعيل البحث في الإنترنت (أو Deep Research). كل وكيل يرد بكائن JSON.",
+  st2:"٢. الصق الردود الثلاثة وأنشئ نص الدمج",
+  st2_help:"الصق رد كل وكيل في خانته (يكفي ردّان). ثم انسخ «نص الدمج» وأعطه لوكيل واحد (يُفضّل الذي يبحث في الإنترنت بأفضل شكل): يقارن الردود ويتحقق منها ويخرج JSON نهائياً.",
+  st3:"٣. صندوق الإدخال — الصق JSON النهائي",
+  st3_help:"الصق الرد النهائي هنا. يُفحص قبل النشر، ويمكنك معاينته على هذا الجهاز أولاً.",
+  copy_collect:"نسخ نص الجمع",copy_merge:"نسخ نص الدمج",show_prompt:"عرض النص",out_lang:"لغة الملخص النهائي",
+  lang_both:"العربية والإنجليزية",lang_en:"الإنجليزية",lang_ar:"العربية",
+  ok_json:"JSON صالح ✓",bad_json:"ليس JSON صالحاً",empty_slot:"فارغ",
+  check:"فحص",preview_dev:"معاينة على هذا الجهاز",publish:"نشر على الموقع",download:"تنزيل briefing.json",
+  clear_prev:"إلغاء المعاينة",unpublish:"حذف الملخص المنشور",
+  errs:"أخطاء",warns:"تنبيهات",checked:n=>`تم الفحص ✓ — ${n} عناصر.`,
+  pub_busy:"جارٍ النشر…",pub_ok:"نُشر ✓ — يظهر على الموقع خلال دقيقة إلى ثلاث دقائق (GitHub Action ثم Kinsta).",
+  see_commit:"التعديل على GitHub ↗",see_actions:"حالة النشر ↗",
+  no_token:"لا يوجد رمز GitHub بعد — أضفه من «الإدارة ← الإعدادات»، أو استخدم «تنزيل briefing.json» وضع الملف في site/data/ ثم انشره.",
+  prev_ok:"المعاينة محفوظة على هذا الجهاز — افتح «السوق» لتراها.",
+  current_pub:"المنشور حالياً",nothing_pub:"لا شيء منشور بعد.",confirm_unpub:"حذف الملخص المنشور من الموقع؟",
+  gh_title:"النشر على GitHub",
+  gh_help:"لينشر زر «نشر على الموقع» الملف site/data/briefing.json مباشرة، أنشئ رمزاً دقيق الصلاحيات (fine-grained token) على GitHub: Settings ← Developer settings ← Fine-grained tokens ← Generate. اختر هذا المستودع فقط، وصلاحية Contents: Read and write. يُحفظ الرمز في هذا المتصفح فقط.",
+  gh_token:"الرمز",gh_repo:"المستودع",gh_branch:"الفرع",save:"حفظ",test:"اختبار",forget:"نسيان الرمز",
+  gh_ok:r=>`يعمل ✓ — يمكنه الكتابة في ${r.repo} (الفرع ${r.branch}).`,new_token:"إنشاء رمز على GitHub ↗",
+});
+Object.assign(I18N.en,{
+  m_admin:"Admin",s_briefing:"Market briefing",s_settings:"Settings",
+  h_pricedb:"From the price database",b_title:"Today's market briefing",b_preview:"Preview on this device only — not published yet",
+  b_stale:n=>`This briefing is ${n} days old.`,b_by:"Sources",b_editor:"Cross-checked by",
+  b_indicators:"Market indicators",b_notes:"Quick notes",b_holdings:"Your holdings and watchlist",b_gainers:"Gainers",b_losers:"Losers",
+  b_news:"Market news",b_calendar:"Coming up",b_unconfirmed:"Unconfirmed or disputed",b_disagree:"Where the agents disagreed",b_sources:"Sources",
+  b_why_cad:"For a CAD investor:",mood_risk_on:"risk-on",mood_risk_off:"risk-off",mood_mixed:"mixed",
+  conf_high:"high confidence",conf_medium:"medium confidence",conf_low:"low confidence",
+  b_none_admin:"No market briefing has been published yet.",
+  b_disclaimer:"Collected and cross-checked by AI from web sources; it can contain mistakes. General information, not personalised financial advice.",
+  ad_title:"Admin area",ad_pw:"Admin password",ad_go:"Enter",ad_bad:"Wrong password.",ad_out:"Leave admin",
+  ad_nopw:"No admin password is set yet. On your computer run: python scripts/set_password.py --admin, then commit and push.",
+  ad_lock:"Simple in-browser protection (the site is static). Publishing itself needs a GitHub token that is stored in your browser only.",
+  st1:"1. Collect — the same prompt for ChatGPT, Gemini and Claude",
+  st1_help:"Copy this prompt and paste it unchanged into a new chat with each agent, with web search (or Deep Research) turned on. Each agent replies with one JSON object.",
+  st2:"2. Paste the three replies and build the merge prompt",
+  st2_help:"Paste each agent's reply in its box (two are enough). Then copy the merge prompt and give it to ONE agent (preferably the one that browses best): it cross-checks the replies, verifies them and returns the final JSON.",
+  st3:"3. Inbox — paste the final JSON",
+  st3_help:"Paste the final reply here. It is checked before publishing, and you can preview it on this device first.",
+  copy_collect:"Copy collect prompt",copy_merge:"Copy merge prompt",show_prompt:"Show the prompt",out_lang:"Language of the final briefing",
+  lang_both:"Arabic and English",lang_en:"English",lang_ar:"Arabic",
+  ok_json:"valid JSON ✓",bad_json:"not valid JSON",empty_slot:"empty",
+  check:"Check",preview_dev:"Preview on this device",publish:"Publish to the site",download:"Download briefing.json",
+  clear_prev:"Remove preview",unpublish:"Remove the published briefing",
+  errs:"Errors",warns:"Warnings",checked:n=>`Checked ✓ — ${n} items.`,
+  pub_busy:"Publishing…",pub_ok:"Published ✓ — it appears on the site in 1-3 minutes (GitHub Action, then Kinsta).",
+  see_commit:"The commit on GitHub ↗",see_actions:"Publish status ↗",
+  no_token:"No GitHub token yet — add one in Admin → Settings, or use “Download briefing.json”, put the file in site/data/ and push it.",
+  prev_ok:"Preview saved on this device — open Market to see it.",
+  current_pub:"Currently published",nothing_pub:"Nothing published yet.",confirm_unpub:"Remove the published briefing from the site?",
+  gh_title:"Publishing to GitHub",
+  gh_help:"For “Publish to the site” to write site/data/briefing.json directly, create a fine-grained token on GitHub: Settings → Developer settings → Fine-grained tokens → Generate. Pick only this repository and the permission Contents: Read and write. The token is stored in this browser only.",
+  gh_token:"Token",gh_repo:"Repository",gh_branch:"Branch",save:"Save",test:"Test",forget:"Forget the token",
+  gh_ok:r=>`Works ✓ — it can write to ${r.repo} (branch ${r.branch}).`,new_token:"Create a token on GitHub ↗",
+});
+const tx=v=>v==null?"":typeof v==="string"?v:(v[LANG]||v.en||v.ar||"");
+const pctn=x=>x==null||isNaN(x)?"—":(x>=0?"+":"")+Number(x).toFixed(2)+"%";
+const clsn=x=>x==null?"muted":x>=0?"good":"bad";
+function srcLine(x){const u=safeUrl(x.url),p=[x.source,x.date].filter(Boolean).map(esc).join(", ");
+  const conf=x.confidence?` · ${T("conf_"+x.confidence)}`:"",agr=x.agreement?` <span class="chip ltr" title="agreement">${esc(x.agreement)}</span>`:"";
+  return (p||conf||agr)?`<div class="muted" style="font-size:12.5px">${u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${p||"link"}</a>`:p}${conf}${agr}</div>`:""}
+function briefingHtml(b,{today,preview}={}){
+  const age=b.as_of&&today?Math.round((new Date(today)-new Date(b.as_of))/864e5):0;
+  const tone={positive:"good",negative:"bad",caution:"warn",neutral:""};
+  const head=`<div class="card"><div class="row" style="margin-bottom:6px"><h3 style="margin:0">${T("b_title")}</h3>
+    <span class="chip ltr">${esc(b.as_of||"")}</span>${b.mood?`<span class="chip ${b.mood==="risk-on"?"goodc":b.mood==="risk-off"?"warnc":""}">${T("mood_"+b.mood.replace("-","_"))}</span>`:""}
+    ${preview?`<span class="chip warnc">${T("b_preview")}</span>`:""}</div>
+    ${age>3?`<p class="warn" style="margin:4px 0">${T("b_stale",age)}</p>`:""}
+    ${b.bottom_line?`<p style="font-size:15.5px;margin:6px 0">${esc(tx(b.bottom_line))}</p>`:""}
+    <div class="muted" style="font-size:12.5px">${b.agents&&b.agents.length?`${T("b_by")}: ${b.agents.map(a=>NAMES[String(a).toLowerCase()]?ag(String(a).toLowerCase()):esc(a)).join(", ")}`:""}${b.editor?` · ${T("b_editor")}: ${esc(b.editor)}`:""}${b.editor_note?` · ${esc(tx(b.editor_note))}`:""}</div></div>`;
+  const ind=b.indicators.length?`<h3 style="margin:4px 0 8px;font-size:15px">${T("b_indicators")}</h3><div class="grid">${b.indicators.map(x=>`<div class="card kpi" style="margin:0" title="${esc([x.source,x.date].filter(Boolean).join(", "))}">
+     <div class="l">${esc(x.name)}</div><div class="v ltr">${esc(x.value||"—")} <span class="muted" style="font-size:12px;font-weight:400">${esc(x.unit||"")}</span></div>
+     <div>${x.change_pct!=null?`<span class="ltr ${/vix/i.test(x.name+(x.symbol||""))?(x.change_pct>0?"bad":"good"):clsn(x.change_pct)}">${pctn(x.change_pct)}</span> <span class="muted">${esc(x.period||"")}</span>`:""}</div>
+     ${x.note?`<div class="muted" style="font-size:12.5px">${esc(tx(x.note))}</div>`:""}${srcLine({source:x.source,date:x.date,agreement:x.agreement})}</div>`).join("")}</div>`:"";
+  const notes=b.quick_notes.length?`<div class="card"><h3>${T("b_notes")}</h3>${b.quick_notes.map(n=>`<div class="${tone[n.tone]||""}" style="margin:5px 0">• ${esc(tx(n.text))}${n.confidence?` <span class="muted" style="font-size:12px">(${T("conf_"+n.confidence)})</span>`:""}</div>`).join("")}</div>`:"";
+  const cal=b.calendar.length?`<div class="card"><h3>${T("b_calendar")}</h3><div class="tablewrap"><table>${b.calendar.map(c=>`<tr><td class="ltr" style="white-space:nowrap">${esc(c.date||"")}</td><td><b>${esc(tx(c.event))}</b>${c.why?`<div class="muted" style="font-size:12.5px">${esc(tx(c.why))}</div>`:""}</td></tr>`).join("")}</table></div></div>`:"";
+  const hold=b.holdings.length?`<div class="card"><h3>${T("b_holdings")}</h3><div class="tablewrap"><table>${b.holdings.map(x=>`<tr>${tkCell(x.ticker,x.name)}
+     <td class="ltr" style="white-space:nowrap">${esc(x.price||"")} <span class="muted">${esc(x.currency||"")}</span></td>
+     <td class="ltr ${clsn(x.change_pct)}" style="white-space:nowrap">${pctn(x.change_pct)} <span class="muted">${esc(x.period||"")}</span></td>
+     <td>${esc(tx(x.note))}${srcLine(x)}</td></tr>`).join("")}</table></div></div>`:"";
+  const mv=(rs,h,c)=>`<div class="card"><h3 class="${c}">${T(h)}</h3>${rs.length?`<div class="tablewrap"><table>${rs.map(x=>`<tr>${tkCell(x.ticker,x.name)}
+     <td class="ltr ${clsn(x.change_pct)}" style="white-space:nowrap">${pctn(x.change_pct)}${x.exchange?`<div class="muted" style="font-size:12px">${esc(x.exchange)}</div>`:""}</td>
+     <td>${esc(tx(x.reason))}${srcLine(x)}</td></tr>`).join("")}</table></div>`:`<p class="muted">${T("no_data")}</p>`}</div>`;
+  const movers=b.gainers.length||b.losers.length?`<div class="cards">${mv(b.gainers,"b_gainers","good")}${mv(b.losers,"b_losers","bad")}</div>`:"";
+  const news=b.news.length?`<div class="card"><h3>${T("b_news")}</h3>${b.news.map(n=>{const u=safeUrl(n.url);return `<div style="padding:8px 0;border-bottom:1px solid var(--line)">
+     ${u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none">${esc(tx(n.headline))}</a>`:`<b>${esc(tx(n.headline))}</b>`}
+     ${(n.tickers||[]).map(t=>`<span class="chip ltr">${esc(t)}</span>`).join(" ")}
+     ${n.summary?`<div>${esc(tx(n.summary))}</div>`:""}${n.why_it_matters_cad?`<div class="muted" style="font-size:13.5px"><b>${T("b_why_cad")}</b> ${esc(tx(n.why_it_matters_cad))}</div>`:""}
+     ${srcLine({...n,url:null})}</div>`}).join("")}</div>`:"";
+  const unc=b.unconfirmed.length?`<details class="card"><summary><b>${T("b_unconfirmed")}</b> (${b.unconfirmed.length})</summary>${b.unconfirmed.map(x=>`<div style="margin:6px 0">• ${esc(tx(x.claim))}
+     <span class="muted" style="font-size:12.5px">${[x.status,(x.from||[]).join(", "),x.source,x.date].filter(Boolean).map(esc).join(" · ")}</span>${x.note?`<div class="muted" style="font-size:12.5px">${esc(tx(x.note))}</div>`:""}</div>`).join("")}</details>`:"";
+  const dis=b.disagreements.length?`<details class="card"><summary><b>${T("b_disagree")}</b> (${b.disagreements.length})</summary>${b.disagreements.map(x=>`<div style="margin:8px 0"><b>${esc(tx(x.topic))}</b>
+     <div>${esc(tx(x.positions))}</div><div class="muted">→ ${esc(tx(x.resolution))}</div></div>`).join("")}</details>`:"";
+  const src=b.sources.length?`<details class="card"><summary><b>${T("b_sources")}</b> (${b.sources.length})</summary>${b.sources.map(x=>{const u=safeUrl(x.url);
+     return `<div style="font-size:13px;margin:3px 0">${esc(x.publisher)} — ${u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(x.title||u)}</a>`:esc(x.title||"")} <span class="muted ltr">${esc(x.date||"")}</span></div>`}).join("")}</details>`:"";
+  return head+ind+`<div class="cards">${notes}${cal}</div>`+hold+movers+news+unc+dis+src+`<div class="note">${T("b_disclaimer")}</div>`;
+}
+
+/* --- admin --- */
+async function adminGate(v){
+  if(await Admin.signedIn())return true;
+  const a=await Admin.auth();
+  if(!a){v.innerHTML=`<div class="card"><h3>${T("ad_title")}</h3><p>${T("ad_nopw")}</p></div>`;return false}
+  v.innerHTML=`<div class="card" style="max-width:420px;margin:30px auto;text-align:center"><h3>${T("ad_title")}</h3>
+    <form id="adf"><input type="password" id="adpw" autocomplete="current-password" placeholder="${T("ad_pw")}" style="width:100%;margin:10px 0;padding:10px" required>
+    <button class="btn" style="width:100%">${T("ad_go")}</button></form><p id="admsg" class="bad"></p><p class="muted" style="font-size:12.5px">${T("ad_lock")}</p></div>`;
+  $("#adpw").focus();
+  $("#adf").onsubmit=async e=>{e.preventDefault();$("#admsg").textContent="…";
+    let ok=false;try{ok=await Admin.signIn($("#adpw").value)}catch(x){$("#admsg").textContent=x.message;return}
+    if(ok)render();else{$("#admsg").textContent=T("ad_bad");$("#adpw").select()}};
+  return false;
+}
+async function copyText(t,msgEl,preEl){
+  try{await navigator.clipboard.writeText(t);msgEl.textContent=T("copied")}
+  catch(e){if(preEl){preEl.closest("details").open=true;const r=document.createRange();r.selectNodeContents(preEl);getSelection().removeAllRanges();getSelection().addRange(r)}msgEl.textContent=T("selected")}
+}
+VIEWS["admin.briefing"]=async v=>{
+  if(!await adminGate(v))return;
+  const ctx=await api("/api/brief_tickers"),dr=load("ps_brief_drafts",{chatgpt:"",gemini:"",claude:"",lang:"both",final:""});
+  const collect=Admin.collectPrompt(ctx);
+  let pub=null;try{const r=await fetch("data/briefing.json?t="+Date.now(),{cache:"no-store"});if(r.ok)pub=await r.json()}catch(e){}
+  const loc=Admin.localPreview.get(),hasTok=!!Admin.gh.get().token;
+  v.innerHTML=`<div class="card"><div class="row"><h3 style="margin:0">${T("st1")}</h3><button class="btn" id="cc">${T("copy_collect")}</button><span class="muted" id="ccm"></span></div>
+    <p class="muted">${T("st1_help")}</p><details><summary>${T("show_prompt")}</summary><pre id="ccp">${esc(collect)}</pre></details></div>
+   <div class="card"><h3>${T("st2")}</h3><p class="muted">${T("st2_help")}</p>
+    <div class="agents">${Admin.AGENTS.map(([k])=>`<div><div class="row" style="margin-bottom:4px">${ag(k)} <span id="st-${k}" class="muted" style="font-size:12.5px"></span></div>
+      <textarea data-a="${k}" style="min-height:140px" placeholder="{ &quot;schema&quot;: &quot;ps-market/1&quot;, … }">${esc(dr[k]||"")}</textarea></div>`).join("")}</div>
+    <div class="row" style="margin-top:10px"><label class="muted">${T("out_lang")} <select id="mlang">${["both","en","ar"].map(l=>`<option value="${l}" ${dr.lang===l?"selected":""}>${T("lang_"+l)}</option>`).join("")}</select></label>
+     <button class="btn" id="mc">${T("copy_merge")}</button><button class="btn sec" id="mclr">${T("clear")}</button><span class="muted" id="mcm"></span></div>
+    <details><summary>${T("show_prompt")}</summary><pre id="mcp"></pre></details></div>
+   <div class="card"><h3>${T("st3")}</h3><p class="muted">${T("st3_help")}</p>
+    <textarea id="fin" placeholder="{ &quot;schema&quot;: &quot;ps-briefing/1&quot;, … }">${esc(dr.final||"")}</textarea>
+    <div class="row" style="margin-top:10px"><button class="btn sec" id="fchk">${T("check")}</button><button class="btn sec" id="fprev">${T("preview_dev")}</button>
+     <button class="btn" id="fpub">${T("publish")}</button><button class="btn sec" id="fdl">${T("download")}</button></div>
+    <div id="fmsg"></div>${hasTok?"":`<p class="muted" style="font-size:13px">${T("no_token")}</p>`}</div>
+   <div class="card"><h3>${T("current_pub")}</h3>${pub?`<p><span class="chip ltr">${esc(pub.as_of||"")}</span> <span class="muted ltr">${esc(pub.published_at||pub.generated_at||"")}</span> — ${esc(tx(pub.bottom_line)).slice(0,220)}</p>`:`<p class="muted">${T("nothing_pub")}</p>`}
+    <div class="row">${loc?`<button class="btn sec sm" id="pclr">${T("clear_prev")}</button>`:""}${pub&&hasTok?`<button class="btn danger sm" id="unpub">${T("unpublish")}</button>`:""}
+     <button class="btn sec sm" id="aout">${T("ad_out")}</button></div><p id="pmsg2"></p></div>
+   <div id="fview"></div>`;
+  const save=()=>store("ps_brief_drafts",dr);
+  const mprompt=()=>Admin.mergePrompt(ctx,dr,dr.lang);
+  const status=()=>{for(const [k] of Admin.AGENTS){const t=(dr[k]||"").trim(),el=$("#st-"+k);
+      el.innerHTML=!t?T("empty_slot"):Admin.extract(t)?`<span class="good">${T("ok_json")}</span>`:`<span class="bad">${T("bad_json")}</span>`}
+    $("#mcp").textContent=mprompt()};
+  status();
+  $("#cc").onclick=()=>copyText(collect,$("#ccm"),$("#ccp"));
+  document.querySelectorAll("textarea[data-a]").forEach(t=>t.oninput=()=>{dr[t.dataset.a]=t.value;save();status()});
+  $("#mlang").onchange=()=>{dr.lang=$("#mlang").value;save();status()};
+  $("#mc").onclick=()=>copyText(mprompt(),$("#mcm"),$("#mcp"));
+  $("#mclr").onclick=()=>{for(const [k] of Admin.AGENTS){dr[k]="";document.querySelector(`textarea[data-a="${k}"]`).value=""}save();status()};
+  $("#fin").oninput=()=>{dr.final=$("#fin").value;save()};
+  const run=()=>{const r=Admin.check($("#fin").value,ctx.today),n=r.data?["indicators","quick_notes","holdings","gainers","losers","news","calendar"].reduce((a,k)=>a+r.data[k].length,0):0;
+    $("#fmsg").innerHTML=(r.errors.length?`<p class="bad"><b>${T("errs")}:</b> ${r.errors.map(esc).join(" · ")}</p>`:`<p class="good">${T("checked",n)}</p>`)+
+      (r.warnings.length?`<p class="warn"><b>${T("warns")}:</b> ${r.warnings.map(esc).join(" · ")}</p>`:"");
+    $("#fview").innerHTML=r.ok?briefingHtml(r.data,{today:ctx.today,preview:true}):"";return r};
+  $("#fchk").onclick=run;
+  $("#fprev").onclick=()=>{const r=run();if(!r.ok)return;Admin.localPreview.set(r.data);$("#fmsg").insertAdjacentHTML("beforeend",`<p class="good">${T("prev_ok")} <button class="link" onclick="go('home','market')">${T("m_home")} →</button></p>`)};
+  $("#fdl").onclick=()=>{const r=run();if(!r.ok)return;const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(r.data,null,1)+"\n"],{type:"application/json"}));a.download="briefing.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
+  $("#fpub").onclick=async()=>{const r=run();if(!r.ok)return;
+    if(!Admin.gh.get().token){$("#fmsg").insertAdjacentHTML("beforeend",`<p class="warn">${T("no_token")}</p>`);return}
+    $("#fpub").disabled=true;$("#fmsg").insertAdjacentHTML("beforeend",`<p class="muted" id="pbusy">${T("pub_busy")}</p>`);
+    try{const res=await Admin.publish(r.data);Admin.localPreview.set(res.data);
+      $("#pbusy").outerHTML=`<p class="good">${T("pub_ok")} ${res.commit?`<a href="${esc(res.commit)}" target="_blank" rel="noopener">${T("see_commit")}</a> · `:""}<a href="${esc(res.actions)}" target="_blank" rel="noopener">${T("see_actions")}</a></p>`}
+    catch(e){$("#pbusy").outerHTML=`<p class="bad">${esc(e.message||e)}</p>`}
+    $("#fpub").disabled=false};
+  if($("#pclr"))$("#pclr").onclick=()=>{Admin.localPreview.clear();render()};
+  if($("#unpub"))$("#unpub").onclick=async()=>{if(!confirm(T("confirm_unpub")))return;
+    try{await Admin.unpublish();Admin.localPreview.clear();$("#pmsg2").innerHTML=`<span class="good">${T("done")}</span>`}catch(e){$("#pmsg2").innerHTML=`<span class="bad">${esc(e.message||e)}</span>`}};
+  $("#aout").onclick=()=>{Admin.signOut();go("home","market")};
+  if(dr.final)run();
+};
+VIEWS["admin.settings"]=async v=>{
+  if(!await adminGate(v))return;
+  const g=Admin.gh.get(),repo=g.repo||CFG.repo||"";
+  v.innerHTML=`<div class="card"><h3>${T("gh_title")}</h3><p class="muted">${T("gh_help")}</p>
+    <p><a class="btn sec" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">${T("new_token")}</a></p>
+    <div class="formgrid"><label>${T("gh_token")}<input type="password" id="gtok" style="width:340px" autocomplete="off" placeholder="github_pat_…" value="${esc(g.token||"")}"></label>
+     <label>${T("gh_repo")}<input id="grepo" class="ltr" style="width:260px" value="${esc(repo)}"></label>
+     <label>${T("gh_branch")}<input id="gbr" class="ltr" style="width:110px" value="${esc(g.branch||"main")}"></label>
+     <button class="btn" id="gsave">${T("save")}</button><button class="btn sec" id="gtest">${T("test")}</button><button class="btn danger" id="gdel">${T("forget")}</button></div>
+    <p id="gmsg"></p></div>
+   <div class="card"><h3>${T("ad_title")}</h3><p class="muted">${T("ad_lock")}</p><button class="btn sec" id="aout">${T("ad_out")}</button></div>`;
+  const put=()=>Admin.gh.set({token:$("#gtok").value.trim(),repo:$("#grepo").value.trim(),branch:$("#gbr").value.trim()||"main"});
+  $("#gsave").onclick=()=>{put();$("#gmsg").innerHTML=`<span class="good">${T("done")}</span>`};
+  $("#gtest").onclick=async()=>{put();$("#gmsg").textContent="…";try{$("#gmsg").innerHTML=`<span class="good">${esc(T("gh_ok",await Admin.testToken()))}</span>`}catch(e){$("#gmsg").innerHTML=`<span class="bad">${esc(e.message||e)}</span>`}};
+  $("#gdel").onclick=()=>{Admin.gh.clear();render()};
+  $("#aout").onclick=()=>{Admin.signOut();go("home","market")};
 };
 
 /* ---------- header ---------- */

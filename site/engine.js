@@ -882,75 +882,7 @@ CORE: CORE_JSON`;
   const appPrompt = (lab, agent) => (lab.track === "stocks" ? SYSTEM_STOCKS : SYSTEM) + "\n\n" +
     userPrompt(lab, "today's date (write it in session_date)", agent);
 
-  // ------------------------------------------------------------------ market briefing prompts (not scored, not part of the experiment)
-  const BRIEF = `You are AGENT_NAME, acting as a careful market analyst for one private investor.
-Today is DATE. The investor lives in Canada, invests in CAD through a Wealthsimple TFSA
-(10-20 year horizon, about 100 CAD per month on top of a diversified ETF core), and reads
-this briefing to understand the market, not to trade on it.
-
-QUESTION: What moved global and North American markets over the last 5 trading days, why,
-and what should this investor watch over the next 2-3 weeks?
-
-HOLDINGS AND WATCHLIST: TICKERS
-
-Rules
-1. Search the web for current information before answering. If you cannot browse, say so on
-   the first line and give the date your knowledge ends; do not guess at recent events.
-2. Every number (index level, % move, price, probability, earnings figure) needs a source
-   name and its publication date in brackets, e.g. [Reuters, 2026-11-21]. If you cannot
-   attribute a number, leave it out.
-3. Keep confirmed facts and speculation apart. A fact is reported by a primary source
-   (exchange, company release or filing, central bank, statistics agency) or a major outlet
-   (Reuters, Bloomberg, AP, WSJ, FT, CNBC, Globe and Mail). Rumours, single-source reports
-   and commentary go only in the "Unconfirmed / disputed" section, labelled as such.
-4. Check these at the source before writing about them, because they change fast and are
-   often wrong in summaries:
-   - rate expectations: market-implied odds (CME FedWatch for the Fed; OIS / market pricing
-     for the Bank of Canada) with their date, never your own estimate;
-   - leadership changes, IPOs, mergers, guidance: the company's own release or filing;
-   - scheduled dates (earnings, CPI, jobs, central-bank meetings): the official calendar.
-   If a story from earlier in the week was later reversed or corrected, say so.
-5. Canada first: cover the TSX and USD/CAD as well as US markets, and say how each point
-   affects a CAD investor (currency effect, Canadian-listed versions, TFSA rules where they
-   matter, e.g. 15% US withholding tax on US dividends inside a TFSA).
-6. Give each explanation of WHY something moved a confidence level (high / medium / low).
-   Several causes can be true at once: say which mattered most and why.
-7. Do not tell the investor to buy or sell. You may say what would change the picture
-   ("if X happens, Y becomes more likely").
-8. Plain language, short sentences, about 600 words at most.
-AGENT_NOTE
-Format: Markdown, with these headings in this order
-## Bottom line                      (3 sentences at most)
-## What happened                    (confirmed facts, each with [source, date])
-## Why (with confidence)
-## Unconfirmed / disputed
-## What it means for this portfolio  (one line per affected holding or watchlist ticker)
-## Dates to watch                   (table: date | event | why it matters)
-## Sources                          (publisher, title, date, link)
-End with this line exactly: "This is general information, not personalised financial advice."`;
-  const CROSSCHECK = `You are AGENT_NAME. Below are market briefings written today (DATE) by other AI
-analysts for the same investor (Canada, CAD, Wealthsimple TFSA). Check them; do not rewrite them.
-
-1. Disagreements: every factual claim where the briefings disagree with each other or with
-   what you can verify now. For each: the claim, who made it, what you find, your source
-   with its date, and a verdict (confirmed / wrong / cannot verify).
-2. Unsourced numbers: figures that have no source, or whose source you cannot find.
-3. Gaps: anything important that all of them missed (Canada and the CAD included).
-4. Combined summary: at most 6 lines, using only claims you marked confirmed.
-Same rules as the briefings: search the web, cite [source, date], keep facts and speculation
-apart, no buy/sell advice. End with this line exactly:
-"This is general information, not personalised financial advice."
-
---- Briefing 1 (write which AI produced it) ---
-[paste here]
-
---- Briefing 2 (write which AI produced it) ---
-[paste here]`;
-  const AGENT_NOTES = {
-    gemini: "9. Prefer a few verified numbers over many precise ones: a figure without [source, date] counts as an error.",
-    chatgpt: "9. For \"What happened\", prefer sources from the last 72 hours, and check that each one is still current.",
-    claude: "9. Your training data will not cover this week: search before you write, and say when a search found nothing.",
-  };
+  // ------------------------------------------------------------------ holdings + watchlist for the briefing prompts (admin.js)
   async function briefTickers() {
     const ps = DB.portfolios.filter(p => !p.archived);
     await loadPrices(ps.flatMap(pfTickers));
@@ -959,15 +891,6 @@ apart, no buy/sell advice. End with this line exactly:
     const watch = ((CONFIG.home || {}).watchlist || []).filter(t => !held.has(t));
     return (held.size ? [...held].join(", ") + (watch.length ? "; watchlist: " : "") : watch.length ? "watchlist: " : "none listed") + watch.join(", ");
   }
-  async function briefPrompts() {
-    const tk = await briefTickers(), td = today(), out = { brief: {}, crosscheck: {} };
-    for (const a of Object.keys(CONFIG.agents)) {
-      out.brief[a] = rep(BRIEF, [["AGENT_NAME", label(a)], ["DATE", td], ["TICKERS", tk], ["AGENT_NOTE", AGENT_NOTES[a] ? AGENT_NOTES[a] + "\n" : ""]]);
-      out.crosscheck[a] = rep(CROSSCHECK, [["AGENT_NAME", label(a)], ["DATE", td]]);
-    }
-    return out;
-  }
-  const label = a => ({ gemini: "Gemini", chatgpt: "ChatGPT", claude: "Claude" }[a] || a);
 
   // ------------------------------------------------------------------ market home page
   // perf: the same definitions as scripts/build_data.py perf_of() (top movers come from there)
@@ -1006,7 +929,8 @@ apart, no buy/sell advice. End with this line exactly:
   async function homeData() {
     await resolveDue();
     const home = CONFIG.home || {}, indices = home.indices || ["^GSPTSE", "^GSPC", "^IXIC", "^VIX", "XEQT.TO"];
-    const market = await getJSON(`data/market.json?v=${encodeURIComponent(INDEX.updated || "0")}`, null);
+    const [market, briefing] = await Promise.all([getJSON(`data/market.json?v=${encodeURIComponent(INDEX.updated || "0")}`, null),
+      getJSON(`data/briefing.json?t=${Date.now()}`, null)]);
     // holdings across all open portfolios, valued in CAD
     const ps = DB.portfolios.filter(p => !p.archived);
     await loadPrices(ps.flatMap(pfTickers));
@@ -1035,12 +959,13 @@ apart, no buy/sell advice. End with this line exactly:
       market_updated: market ? market.updated : null, indices: indices.map(quoteRow), holdings, total,
       watchlist: watch.map(quoteRow), universe, trending: (market && market.trending) || [], news: (market && market.news) || [],
       consensus: { etf: latestConsensus("etf"), stocks: tracks().includes("stocks") ? latestConsensus("stocks") : null },
-      scoreboard: sb, session_day: CONFIG.lab.session_day || 20 };
+      scoreboard: sb, session_day: CONFIG.lab.session_day || 20, briefing };
   }
 
   // ------------------------------------------------------------------ GET handlers
   const G = {};
   G.home = homeData;
+  G.brief_tickers = async () => ({ tickers: await briefTickers(), today: today(), repo: CONFIG.repo || null });
   G.config = () => {
     const s = trackCfg("stocks"), lab = CONFIG.lab;
     return { agents: CONFIG.agents, benchmark: lab.benchmark, universe: lab.universe, horizons_days: lab.horizons_days,
@@ -1146,7 +1071,7 @@ apart, no buy/sell advice. End with this line exactly:
   G.prompts = async () => {
     const out = {};
     for (const t of tracks()) { out[t] = {}; for (const a of manualAgents()) out[t][a] = appPrompt(trackCfg(t), a); }
-    return Object.assign(out, await briefPrompts());
+    return out;
   };
   G.log = () => ({ text: DB.log.slice(-300).join("\n") });
   G.investors = investorsOverview;

@@ -1,9 +1,12 @@
 """Sets (or removes) the password that protects the site.
 
-    python scripts/set_password.py            asks for the new password
-    python scripts/set_password.py --remove   no password
+    python scripts/set_password.py                    site password (asks for it)
+    python scripts/set_password.py --remove           no site password
+    python scripts/set_password.py --admin            admin password (Admin menu: market briefing)
+    python scripts/set_password.py --admin --remove   no admin password (the Admin menu stays locked)
 
-Writes site/auth.json with a salted PBKDF2-SHA256 hash; the password itself is never stored.
+Writes site/auth.json (or site/admin.json with --admin) with a salted PBKDF2-SHA256 hash; the
+password itself is never stored.
 Then commit and push (git commit -am "New password" && git push): the site is republished
 automatically and every browser asks for the new password once.
 
@@ -17,7 +20,7 @@ import secrets
 import sys
 from pathlib import Path
 
-AUTH = Path(__file__).resolve().parent.parent / "site" / "auth.json"
+SITE = Path(__file__).resolve().parent.parent / "site"
 ITER = 200_000
 
 
@@ -28,11 +31,12 @@ def make(password: str) -> dict:
 
 
 def main():
+    AUTH = SITE / ("admin.json" if "--admin" in sys.argv else "auth.json")
     if "--remove" in sys.argv:
         AUTH.unlink(missing_ok=True)
         print("password removed — commit and push to publish")
         return
-    p1 = getpass.getpass("New password: ")
+    p1 = getpass.getpass("New admin password: " if "--admin" in sys.argv else "New password: ")
     if len(p1) < 6:
         sys.exit("use at least 6 characters")
     if getpass.getpass("Repeat it: ") != p1:

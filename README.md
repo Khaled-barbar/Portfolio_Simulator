@@ -18,10 +18,13 @@ It has the same dashboard as the desktop app, in Arabic and English:
   filters, follow dates and your own holdings snapshots.
 - **My portfolios:** your own portfolios with buys, sells, deposits and withdrawals. Each one is compared
   with a benchmark that gets the same deposits.
-- **System:** inbox for pasting replies, prompts (the scored experiment prompts, plus a *market briefing*
-  and a *cross-check* prompt that are not scored: facts with dated sources kept apart from speculation,
-  Canada first, confidence levels, no buy/sell advice), report, and **Data** (price database, backup, restore,
-  import from the desktop app).
+- **Admin:** behind a separate admin password. *Market briefing* has one *collect* prompt that you paste
+  unchanged into ChatGPT, Gemini and Claude (each returns JSON with indicators, quick notes, holdings,
+  gainers, losers, news, calendar, sources), boxes to paste their replies, a *merge* prompt for one agent to
+  cross-check them into a final JSON (Arabic and English), and an inbox that checks that JSON, previews it
+  and publishes it to the Market page. *Settings* holds the GitHub token used for publishing.
+- **System:** inbox for pasting the monthly experiment replies, prompts, report, and **Data** (price
+  database, backup, restore, import from the desktop app).
 
 ## How it works
 
@@ -113,6 +116,26 @@ The site is static, so the check runs in the browser. It keeps casual visitors a
 `robots.txt` plus a `noindex` tag keep the site out of search engines. It is not bank-grade security.
 Visitors can't change anything for other people: everything a visitor enters (replies, portfolios)
 stays in their own browser.
+
+## Admin and the market briefing
+
+The admin password is separate from the site password: `python scripts/set_password.py --admin`, then
+commit and push. Like the site password, it is checked in the browser (the site is static; Kinsta's
+htpasswd protection is for WordPress sites only), so it is light protection. Publishing itself needs a
+GitHub token that only exists in your browser.
+
+1. **Admin → Market briefing → Copy collect prompt.** Paste it into a new chat in ChatGPT, Gemini and
+   Claude with web search on. It is filled in with today's date and your holdings + watchlist.
+2. Paste each reply in its box (two are enough), pick the language, **Copy merge prompt**, and give it to
+   one agent. It verifies the reports, resolves disagreements and returns the final JSON.
+3. Paste the final JSON in the inbox → **Check** → **Preview on this device** or **Publish to the site**.
+   Publishing writes `site/data/briefing.json` on `main` through the GitHub API; the GitHub Action
+   republishes the site and Kinsta redeploys it (1–3 minutes). Without a token, **Download
+   briefing.json**, put it in `site/data/` and push.
+
+**GitHub token (once):** GitHub → Settings → Developer settings → Fine-grained tokens → Generate.
+Repository access: only this repository. Permissions: *Contents: Read and write*. Paste it in
+*Admin → Settings* and press *Test*.
 
 ## Common tasks
 
