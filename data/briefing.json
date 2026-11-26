@@ -1,0 +1,1217 @@
+{
+ "schema": "ps-briefing/1",
+ "as_of": "2026-11-23",
+ "generated_at": "2026-11-24T17:20:00Z",
+ "agents": [
+  "chatgpt",
+  "gemini",
+  "claude"
+ ],
+ "editor": "Claude Opus 5.5 (Anthropic)",
+ "editor_note": {
+  "en": "Checked index levels, holdings prices, USD/CAD, the CrowdStrike–Zscaler deal, Telus and the Bank of Canada calendar by web search on 2026-11-24. Several smaller US losers and some Canadian movers could not be verified and were moved to 'unconfirmed'.",
+  "ar": "تحققنا عبر البحث على الإنترنت بتاريخ 2026-11-24 من مستويات المؤشرات وأسعار الأصول المحتفظ بها وسعر USD/CAD وصفقة CrowdStrike–Zscaler وسهم Telus وجدول مواعيد Bank of Canada. تعذّر التحقق من بعض الأسهم الأمريكية الخاسرة الأصغر وبعض تحركات الأسهم الكندية، فنُقلت إلى قسم 'unconfirmed'."
+ },
+ "mood": "mixed",
+ "bottom_line": {
+  "en": "North American stocks had their best day since April 2025 on Nov 23 after Nvidia's board reinstated Jensen Huang as CEO. That recovered only about half of the previous week's AI-led rout, and the bounce was already fading in early trading on Nov 24. The Canadian dollar fell to a 19-month low, oil hit a three-month low, and a Fed hike on Dec 9 remains priced as near-certain.",
+  "ar": "حققت الأسهم في أمريكا الشمالية أفضل يوم لها منذ أبريل 2025 في 23 نوفمبر، بعد أن أعاد مجلس إدارة Nvidia تعيين Jensen Huang رئيسًا تنفيذيًا. غير أن هذا الارتداد لم يعوّض سوى نحو نصف خسائر الأسبوع السابق التي قادتها أسهم الذكاء الاصطناعي، وبدأ يتلاشى في التداولات المبكرة يوم 24 نوفمبر. وهبط الدولار الكندي إلى أدنى مستوى له في 19 شهرًا، وتراجع النفط إلى أدنى مستوى في ثلاثة أشهر، ولا تزال الأسواق تسعّر رفع Fed للفائدة في 9 ديسمبر شبه مؤكد."
+ },
+ "disclaimer": {
+  "en": "General information, not personalised financial advice.",
+  "ar": "معلومات عامة، وليست نصيحة مالية شخصية."
+ },
+ "published_at": "2026-11-26T14:17:41Z",
+ "indicators": [
+  {
+   "name": "S&P/TSX Composite",
+   "symbol": "^GSPTSE",
+   "value": "34,082.12",
+   "unit": "pts",
+   "change_pct": 2.69,
+   "period": "1d",
+   "note": {
+    "en": "Biggest daily gain since April 2025; ended a seven-session losing streak. Energy was the only major sector lower.",
+    "ar": "أكبر مكسب يومي منذ أبريل 2025، وأنهى سلسلة خسائر استمرت سبع جلسات. وكان قطاع الطاقة القطاع الرئيسي الوحيد المتراجع."
+   },
+   "source": "Yahoo Finance / Reuters",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "S&P 500",
+   "symbol": "^GSPC",
+   "value": "7,237.17",
+   "unit": "pts",
+   "change_pct": 4.73,
+   "period": "1d",
+   "note": {
+    "en": "Recovered just over half of the previous week's 8.6% loss.",
+    "ar": "استعاد ما يزيد قليلًا على نصف خسارة الأسبوع السابق البالغة 8.6%."
+   },
+   "source": "AP",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "Nasdaq Composite",
+   "symbol": "^IXIC",
+   "value": "24,089.56",
+   "unit": "pts",
+   "change_pct": 6.51,
+   "period": "1d",
+   "note": {
+    "en": "Best day since April 9, 2025, led by chip and AI stocks.",
+    "ar": "أفضل يوم منذ 9 أبريل 2025، بقيادة أسهم الرقائق والذكاء الاصطناعي."
+   },
+   "source": "AP",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "Dow Jones Industrial Average",
+   "symbol": "^DJI",
+   "value": "49,595.31",
+   "unit": "pts",
+   "change_pct": 3.01,
+   "period": "1d",
+   "note": {
+    "en": "Up 1,448 points.",
+    "ar": "ارتفع بمقدار 1,448 نقطة."
+   },
+   "source": "AP",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "Russell 2000",
+   "symbol": "^RUT",
+   "value": "2,669.66",
+   "unit": "pts",
+   "change_pct": 3.4,
+   "period": "1d",
+   "note": {
+    "en": "Small caps joined the rebound.",
+    "ar": "شاركت أسهم الشركات الصغيرة في الارتداد."
+   },
+   "source": "AP",
+   "date": "2026-11-23",
+   "agreement": "2/3"
+  },
+  {
+   "name": "VIX",
+   "symbol": "^VIX",
+   "value": "26.62",
+   "unit": "pts",
+   "change_pct": -25.83,
+   "period": "1d",
+   "note": {
+    "en": "Down from 35.89 but still elevated.",
+    "ar": "تراجع من 35.89 لكنه لا يزال مرتفعًا."
+   },
+   "source": "Cboe / Capp Notes",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "USD/CAD",
+   "symbol": "CAD=X",
+   "value": "1.4380",
+   "unit": "CAD per USD",
+   "change_pct": 0.3,
+   "period": "intraday",
+   "note": {
+    "en": "The loonie hit a 19-month low and was on track for a 10th straight daily decline, its longest losing streak since January 2016. A higher number means a weaker CAD.",
+    "ar": "هبط الدولار الكندي إلى أدنى مستوى في 19 شهرًا، وكان في طريقه إلى تراجعه اليومي العاشر على التوالي، وهي أطول سلسلة خسائر منذ يناير 2016. ويعني ارتفاع الرقم ضعف CAD."
+   },
+   "source": "Reuters",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "US 10-year Treasury yield",
+   "symbol": "^TNX",
+   "value": "4.92",
+   "unit": "%",
+   "change_pct": null,
+   "period": "1d",
+   "note": {
+    "en": "Roughly unchanged; the 2-year was at 4.63%.",
+    "ar": "دون تغيير يُذكر، وكان عائد السندات لأجل سنتين عند 4.63%."
+   },
+   "source": "US Treasury / BondStats",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "Canada 10-year yield",
+   "symbol": "CA10Y",
+   "value": "3.69",
+   "unit": "%",
+   "change_pct": null,
+   "period": "1d",
+   "note": {
+    "en": "Down about 2 basis points. The Bank of Canada series shows 3.68, a difference within rounding.",
+    "ar": "تراجع بنحو نقطتي أساس. وتُظهر بيانات Bank of Canada مستوى 3.68، والفارق ضمن حدود التقريب."
+   },
+   "source": "Trading Economics",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "WTI crude oil",
+   "symbol": "CL=F",
+   "value": "80.17",
+   "unit": "USD/bbl",
+   "change_pct": -3.88,
+   "period": "1d",
+   "note": {
+    "en": "Three-month low on rising Middle East supply and a Libyan pipeline restart.",
+    "ar": "أدنى مستوى في ثلاثة أشهر بسبب زيادة إمدادات الشرق الأوسط وإعادة تشغيل خط أنابيب ليبي."
+   },
+   "source": "Reuters",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "Gold",
+   "symbol": "GC=F",
+   "value": "3,651.40",
+   "unit": "USD/oz",
+   "change_pct": null,
+   "period": "1d",
+   "note": {
+    "en": "Rebounded from more than one-year lows. The three reports give levels between 3,651 and 3,655.",
+    "ar": "ارتد من أدنى مستوياته في أكثر من عام. وتتراوح المستويات الواردة في التقارير الثلاثة بين 3,651 و3,655."
+   },
+   "source": "Investrade",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "name": "Fed Dec 9 meeting odds (CME FedWatch)",
+   "symbol": "FEDWATCH",
+   "value": "95",
+   "unit": "% probability of a hike",
+   "change_pct": null,
+   "period": "as of 2026-11-18",
+   "note": {
+    "en": "About 95% after hawkish Fed minutes. Reuters reported on Nov 24 that a 25bp hike is fully priced, with a slim chance of 50bp.",
+    "ar": "نحو 95% بعد محضر اجتماع Fed الذي جاء متشددًا. وأفادت Reuters في 24 نوفمبر بأن رفعًا بمقدار 25 نقطة أساس مسعَّر بالكامل، مع احتمال ضئيل لرفع بمقدار 50 نقطة أساس."
+   },
+   "source": "AP",
+   "date": "2026-11-18",
+   "agreement": "2/3"
+  },
+  {
+   "name": "Bank of Canada policy rate",
+   "symbol": "BOC",
+   "value": "2.50",
+   "unit": "%",
+   "change_pct": null,
+   "period": "current",
+   "note": {
+    "en": "Raised 25bp on Oct 28, its first hike since 2023. The next decision is Dec 9; market odds are disputed.",
+    "ar": "رُفع بمقدار 25 نقطة أساس في 28 أكتوبر، وهو أول رفع منذ 2023. القرار التالي في 9 ديسمبر، واحتمالات السوق موضع خلاف."
+   },
+   "source": "Bank of Canada",
+   "date": "2026-10-28",
+   "agreement": "2/3"
+  }
+ ],
+ "quick_notes": [
+  {
+   "text": {
+    "en": "Monday's rebound recovered only about half of last week's losses, and Nvidia was down about 5–6% in early trading on Nov 24.",
+    "ar": "لم يعوّض ارتداد يوم الاثنين سوى نحو نصف خسائر الأسبوع الماضي، وكان سهم Nvidia منخفضًا بنحو 5–6% في التداولات المبكرة يوم 24 نوفمبر."
+   },
+   "tone": "caution",
+   "confidence": "high",
+   "agreement": "2/3"
+  },
+  {
+   "text": {
+    "en": "A loonie at a 19-month low raises the CAD value of unhedged US holdings such as VFV.TO, but makes new USD purchases more expensive. ZQQ.TO is hedged to CAD and does not get this effect.",
+    "ar": "يؤدي هبوط الدولار الكندي إلى أدنى مستوى في 19 شهرًا إلى رفع قيمة الأصول الأمريكية غير المحوّطة مثل VFV.TO بالدولار الكندي، لكنه يجعل الشراء الجديد بالدولار الأمريكي أغلى. أما ZQQ.TO فهو محوّط إلى CAD ولا يستفيد من هذا الأثر."
+   },
+   "tone": "neutral",
+   "confidence": "high",
+   "agreement": "3/3"
+  },
+  {
+   "text": {
+    "en": "In a TFSA, the 15% US withholding tax on US dividends cannot be recovered; Canadian dividends such as RY.TO's are not affected.",
+    "ar": "في حساب TFSA لا يمكن استرداد ضريبة الاقتطاع الأمريكية البالغة 15% على توزيعات الأرباح الأمريكية، بينما لا تتأثر توزيعات الأرباح الكندية مثل توزيعات RY.TO."
+   },
+   "tone": "neutral",
+   "confidence": "high",
+   "agreement": "3/3"
+  },
+  {
+   "text": {
+    "en": "A US Fed hike on Dec 9 is priced as near-certain, so the Dec 4 US jobs report and Dec 10 US CPI could shift talk toward a 50bp move.",
+    "ar": "تسعّر الأسواق رفع Fed للفائدة في 9 ديسمبر بوصفه شبه مؤكد، لذا قد يدفع تقرير الوظائف الأمريكي في 4 ديسمبر ومؤشر CPI الأمريكي في 10 ديسمبر النقاش نحو رفع بمقدار 50 نقطة أساس."
+   },
+   "tone": "caution",
+   "confidence": "medium",
+   "agreement": "2/3"
+  },
+  {
+   "text": {
+    "en": "Bank of Canada Governor Macklem speaks today at 12:40 ET; markets disagree on whether the Bank hikes on Dec 9.",
+    "ar": "يتحدث محافظ Bank of Canada السيد Macklem اليوم الساعة 12:40 بتوقيت شرق أمريكا، والأسواق منقسمة حول ما إذا كان البنك سيرفع الفائدة في 9 ديسمبر."
+   },
+   "tone": "caution",
+   "confidence": "high",
+   "agreement": "editor"
+  },
+  {
+   "text": {
+    "en": "Oil at a three-month low weighs on TSX energy stocks and the loonie, but eases inflation pressure.",
+    "ar": "يضغط وصول النفط إلى أدنى مستوى في ثلاثة أشهر على أسهم الطاقة في TSX وعلى الدولار الكندي، لكنه يخفف الضغوط التضخمية."
+   },
+   "tone": "neutral",
+   "confidence": "high",
+   "agreement": "3/3"
+  }
+ ],
+ "holdings": [
+  {
+   "ticker": "NVDA",
+   "name": "NVIDIA",
+   "price": "165.05",
+   "currency": "USD",
+   "change_pct": 31.48,
+   "period": "1d",
+   "note": {
+    "en": "Best day since 2003 after the board reinstated Jensen Huang as CEO; about +5.7% over 5 days.",
+    "ar": "أفضل يوم منذ 2003 بعد أن أعاد مجلس الإدارة تعيين Jensen Huang رئيسًا تنفيذيًا، وارتفع نحو 5.7% على مدى 5 أيام."
+   },
+   "confidence": "high",
+   "source": "Yahoo Finance / NVIDIA",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "ticker": "MSFT",
+   "name": "Microsoft",
+   "price": "492.50",
+   "currency": "USD",
+   "change_pct": 1.65,
+   "period": "1d",
+   "note": {
+    "en": "Lagged the Nasdaq rebound; no company-specific announcement was found. One report puts the 5-day change at -4.92%.",
+    "ar": "تخلّف عن ارتداد Nasdaq، ولم يُعثر على إعلان خاص بالشركة. ويقدّر أحد التقارير التغير على مدى 5 أيام بنحو -4.92%."
+   },
+   "confidence": "high",
+   "source": "Yahoo Finance",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  },
+  {
+   "ticker": "SHOP.TO",
+   "name": "Shopify",
+   "price": "192.96",
+   "currency": "CAD",
+   "change_pct": 8.96,
+   "period": "1d",
+   "note": {
+    "en": "Rebounded with tech after falling 6.5% on Friday; still lower over 5 days.",
+    "ar": "ارتد مع أسهم التكنولوجيا بعد هبوطه 6.5% يوم الجمعة، لكنه لا يزال منخفضًا على مدى 5 أيام."
+   },
+   "confidence": "high",
+   "source": "Yahoo Finance",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "ticker": "RY.TO",
+   "name": "Royal Bank of Canada",
+   "price": "270.29",
+   "currency": "CAD",
+   "change_pct": -5.39,
+   "period": "5d",
+   "note": {
+    "en": "Rose 2.75% on Nov 23 but fell 5.39% over the week. Q4 results are due Dec 3.",
+    "ar": "ارتفع 2.75% في 23 نوفمبر لكنه تراجع 5.39% خلال الأسبوع. ومن المقرر إعلان نتائج الربع الرابع في 3 ديسمبر."
+   },
+   "confidence": "high",
+   "source": "Yahoo Finance / Motley Fool",
+   "date": "2026-11-23",
+   "agreement": "2/3"
+  },
+  {
+   "ticker": "VFV.TO",
+   "name": "Vanguard S&P 500 Index ETF",
+   "price": "184.72",
+   "currency": "CAD",
+   "change_pct": 4.78,
+   "period": "1d",
+   "note": {
+    "en": "Slightly beat the S&P 500's 4.73% because the CAD weakened.",
+    "ar": "تفوّق قليلًا على ارتفاع S&P 500 البالغ 4.73% بسبب ضعف CAD."
+   },
+   "confidence": "high",
+   "source": "Vanguard Canada",
+   "date": "2026-11-23",
+   "agreement": "2/3"
+  },
+  {
+   "ticker": "ZQQ.TO",
+   "name": "BMO Nasdaq 100 Equity Hedged to CAD ETF",
+   "price": null,
+   "currency": "CAD",
+   "change_pct": null,
+   "period": "1d",
+   "note": {
+    "en": "Price not verified. It tracks the Nasdaq-100, which rose 6.86% on Nov 23, hedged to CAD.",
+    "ar": "لم يُتحقق من السعر. يتتبع الصندوق مؤشر Nasdaq-100 الذي ارتفع 6.86% في 23 نوفمبر، مع تحوّط إلى CAD."
+   },
+   "confidence": "medium",
+   "source": "Capp Notes",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  }
+ ],
+ "gainers": [
+  {
+   "ticker": "NVDA",
+   "name": "NVIDIA",
+   "exchange": "NASDAQ",
+   "change_pct": 31.48,
+   "period": "1d",
+   "reason": {
+    "en": "Board reinstated Jensen Huang as CEO.",
+    "ar": "أعاد مجلس الإدارة تعيين Jensen Huang رئيسًا تنفيذيًا."
+   },
+   "confidence": "high",
+   "source": "Longbridge / Quant500",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  },
+  {
+   "ticker": "ALAB",
+   "name": "Astera Labs",
+   "exchange": "NASDAQ",
+   "change_pct": 23.16,
+   "period": "1d",
+   "reason": {
+    "en": "AI connectivity stock rose with Nvidia.",
+    "ar": "ارتفع سهم شركة ربط أنظمة الذكاء الاصطناعي مع Nvidia."
+   },
+   "confidence": "medium",
+   "source": "Longbridge",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  },
+  {
+   "ticker": "CRDO",
+   "name": "Credo Technology",
+   "exchange": "NASDAQ",
+   "change_pct": 22.63,
+   "period": "1d",
+   "reason": {
+    "en": "AI networking stock rose with Nvidia.",
+    "ar": "ارتفع سهم شركة شبكات الذكاء الاصطناعي مع Nvidia."
+   },
+   "confidence": "medium",
+   "source": "Longbridge",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  },
+  {
+   "ticker": "DELL",
+   "name": "Dell Technologies",
+   "exchange": "NYSE",
+   "change_pct": 20.46,
+   "period": "1d",
+   "reason": {
+    "en": "AI server maker joined the hardware rally.",
+    "ar": "انضمت الشركة المصنّعة لخوادم الذكاء الاصطناعي إلى موجة صعود أسهم العتاد."
+   },
+   "confidence": "medium",
+   "source": "Longbridge / Quant500",
+   "date": "2026-11-23",
+   "agreement": "2/3"
+  },
+  {
+   "ticker": "MU",
+   "name": "Micron Technology",
+   "exchange": "NASDAQ",
+   "change_pct": 19.04,
+   "period": "1d",
+   "reason": {
+    "en": "Memory-chip stocks rebounded with the AI trade.",
+    "ar": "ارتدت أسهم رقائق الذاكرة مع عودة الإقبال على أسهم الذكاء الاصطناعي."
+   },
+   "confidence": "medium",
+   "source": "Longbridge / Quant500",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  },
+  {
+   "ticker": "SHOP.TO",
+   "name": "Shopify",
+   "exchange": "TSX",
+   "change_pct": 8.96,
+   "period": "1d",
+   "reason": {
+    "en": "Canadian tech rebounded with US tech.",
+    "ar": "ارتدت أسهم التكنولوجيا الكندية مع نظيرتها الأمريكية."
+   },
+   "confidence": "high",
+   "source": "Yahoo Finance",
+   "date": "2026-11-23",
+   "agreement": "3/3"
+  }
+ ],
+ "losers": [
+  {
+   "ticker": "CRWD",
+   "name": "CrowdStrike",
+   "exchange": "NASDAQ",
+   "change_pct": -8.92,
+   "period": "1d",
+   "reason": {
+    "en": "Announced an all-stock deal to buy Zscaler for about US$43.9 billion.",
+    "ar": "أعلنت صفقة للاستحواذ على Zscaler مقابل أسهم بقيمة نحو 43.9 مليار دولار أمريكي."
+   },
+   "confidence": "high",
+   "source": "CNBC",
+   "date": "2026-11-23",
+   "agreement": "2/3"
+  },
+  {
+   "ticker": "T.TO",
+   "name": "TELUS",
+   "exchange": "TSX",
+   "change_pct": -4.86,
+   "period": "1d",
+   "reason": {
+    "en": "Gave back takeover-driven gains as Telus and Quebecor agreed to keep their buyout talks confidential.",
+    "ar": "تخلّى عن مكاسب سابقة غذّتها أنباء الاستحواذ، بعد أن اتفقت Telus وQuebecor على إبقاء محادثات الاستحواذ سرية."
+   },
+   "confidence": "medium",
+   "source": "Morningstar / Kalkine",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  },
+  {
+   "ticker": "COP",
+   "name": "ConocoPhillips",
+   "exchange": "NYSE",
+   "change_pct": -2.89,
+   "period": "1d",
+   "reason": {
+    "en": "Oil fell to a three-month low.",
+    "ar": "هبط النفط إلى أدنى مستوى في ثلاثة أشهر."
+   },
+   "confidence": "high",
+   "source": "Longbridge",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  },
+  {
+   "ticker": "MCK",
+   "name": "McKesson",
+   "exchange": "NYSE",
+   "change_pct": -1.96,
+   "period": "1d",
+   "reason": {
+    "en": "Defensive stocks lagged as money moved into tech; no company news found.",
+    "ar": "تخلفت الأسهم الدفاعية مع تحوّل الأموال نحو التكنولوجيا، ولم تُرصد أخبار خاصة بالشركة."
+   },
+   "confidence": "low",
+   "source": "Longbridge",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  },
+  {
+   "ticker": "XOM",
+   "name": "Exxon Mobil",
+   "exchange": "NYSE",
+   "change_pct": -1.93,
+   "period": "1d",
+   "reason": {
+    "en": "Oil fell to a three-month low.",
+    "ar": "هبط النفط إلى أدنى مستوى في ثلاثة أشهر."
+   },
+   "confidence": "high",
+   "source": "Longbridge",
+   "date": "2026-11-23",
+   "agreement": "1/3"
+  }
+ ],
+ "news": [
+  {
+   "headline": {
+    "en": "Nvidia board reinstates Jensen Huang as CEO",
+    "ar": "مجلس إدارة Nvidia يعيد تعيين Jensen Huang رئيسًا تنفيذيًا"
+   },
+   "summary": {
+    "en": "The board unanimously reinstated Huang as president, CEO and director after input from senior US government officials. This reverses his Nov 12 resignation and the board's Nov 17 statement that it did not intend to bring him back.",
+    "ar": "أعاد المجلس بالإجماع تعيين Huang رئيسًا ورئيسًا تنفيذيًا وعضوًا في مجلس الإدارة، بعد مشاورات مع كبار مسؤولي الحكومة الأمريكية. ويأتي ذلك عكسًا لاستقالته في 12 نوفمبر ولتصريح المجلس في 17 نوفمبر بأنه لا ينوي إعادته."
+   },
+   "why_it_matters_cad": {
+    "en": "Nvidia is a top weight in VFV.TO and ZQQ.TO, so its swings move both funds.",
+    "ar": "تُعد Nvidia من أكبر المكونات وزنًا في VFV.TO وZQQ.TO، لذا تحرّك تقلباتها الصندوقين."
+   },
+   "tickers": [
+    "NVDA",
+    "VFV.TO",
+    "ZQQ.TO"
+   ],
+   "status": null,
+   "confidence": "high",
+   "source": "NVIDIA (SEC Form 8-K)",
+   "date": "2026-11-23",
+   "url": "https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000090/nov23pressrelease.htm",
+   "agreement": "3/3"
+  },
+  {
+   "headline": {
+    "en": "Wall Street posts best day since April 2025",
+    "ar": "Wall Street يسجّل أفضل يوم منذ أبريل 2025"
+   },
+   "summary": {
+    "en": "The S&P 500 rose 4.73% and the Nasdaq 6.51%, recovering just over half of the previous week's losses.",
+    "ar": "ارتفع S&P 500 بنسبة 4.73% وNasdaq بنسبة 6.51%، مستعيدَين ما يزيد قليلًا على نصف خسائر الأسبوع السابق."
+   },
+   "why_it_matters_cad": {
+    "en": "US equity funds held in CAD rebounded; unhedged funds gained slightly more because the loonie weakened.",
+    "ar": "ارتدت صناديق الأسهم الأمريكية المقوّمة بالدولار الكندي، وحققت الصناديق غير المحوّطة مكسبًا أكبر قليلًا بسبب ضعف الدولار الكندي."
+   },
+   "tickers": [
+    "VFV.TO",
+    "ZQQ.TO"
+   ],
+   "status": null,
+   "confidence": "high",
+   "source": "AP",
+   "date": "2026-11-23",
+   "url": "https://finance.yahoo.com/markets/world-indices/articles/major-us-stock-indexes-fared-213053319.html",
+   "agreement": "3/3"
+  },
+  {
+   "headline": {
+    "en": "TSX posts biggest daily gain since April 2025",
+    "ar": "مؤشر TSX يحقق أكبر مكسب يومي منذ أبريل 2025"
+   },
+   "summary": {
+    "en": "Tech and miners led as gold rebounded and the AI trade revived; energy was the only major sector lower.",
+    "ar": "قادت أسهم التكنولوجيا والتعدين الصعود مع ارتداد الذهب وعودة الإقبال على أسهم الذكاء الاصطناعي، وكان قطاع الطاقة القطاع الرئيسي الوحيد المتراجع."
+   },
+   "why_it_matters_cad": {
+    "en": "Ends a seven-session slide for the core of most Canadian ETF portfolios.",
+    "ar": "ينهي تراجعًا استمر سبع جلسات للمؤشر الذي يشكّل جوهر معظم محافظ صناديق المؤشرات الكندية."
+   },
+   "tickers": [
+    "SHOP.TO",
+    "RY.TO"
+   ],
+   "status": null,
+   "confidence": "high",
+   "source": "Reuters",
+   "date": "2026-11-23",
+   "url": "https://www.marketscreener.com/news/tsx-posts-biggest-daily-gain-since-april-2025-led-by-tech-and-mining-ce7851dadf8bf126",
+   "agreement": "3/3"
+  },
+  {
+   "headline": {
+    "en": "Canadian dollar hits a 19-month low in its longest losing streak since 2016",
+    "ar": "الدولار الكندي يهبط إلى أدنى مستوى في 19 شهرًا في أطول سلسلة خسائر منذ 2016"
+   },
+   "summary": {
+    "en": "The loonie traded around 1.4380 per US dollar, on track for a 10th straight daily decline, as oil fell and the US dollar gained.",
+    "ar": "جرى تداول الدولار الكندي قرب 1.4380 مقابل الدولار الأمريكي، وكان في طريقه إلى تراجعه اليومي العاشر على التوالي، مع هبوط النفط وصعود الدولار الأمريكي."
+   },
+   "why_it_matters_cad": {
+    "en": "Raises the CAD value of unhedged US holdings and the cost of converting CAD to USD.",
+    "ar": "يرفع قيمة الأصول الأمريكية غير المحوّطة بالدولار الكندي، ويزيد كلفة تحويل CAD إلى USD."
+   },
+   "tickers": [
+    "VFV.TO",
+    "ZQQ.TO"
+   ],
+   "status": null,
+   "confidence": "high",
+   "source": "Reuters via The Globe and Mail",
+   "date": "2026-11-23",
+   "url": "https://www.theglobeandmail.com/investing/article-canadian-dollar-on-its-longest-daily-losing-streak-in-more-than-a/",
+   "agreement": "3/3"
+  },
+  {
+   "headline": {
+    "en": "CrowdStrike to buy Zscaler for US$43.9 billion in stock",
+    "ar": "CrowdStrike تستحوذ على Zscaler مقابل أسهم بقيمة 43.9 مليار دولار أمريكي"
+   },
+   "summary": {
+    "en": "CRWD fell 9% and ZS jumped nearly 18%; the deal is expected to close in the second half of CrowdStrike's fiscal 2028.",
+    "ar": "تراجع سهم CRWD بنسبة 9% وقفز سهم ZS بنحو 18%، ومن المتوقع إتمام الصفقة في النصف الثاني من السنة المالية 2028 لشركة CrowdStrike."
+   },
+   "why_it_matters_cad": {
+    "en": "Both are S&P 500 and Nasdaq-100 members, so the deal shifts weights inside VFV.TO and ZQQ.TO.",
+    "ar": "الشركتان مدرجتان في مؤشري S&P 500 وNasdaq-100، لذا تغيّر الصفقة الأوزان داخل VFV.TO وZQQ.TO."
+   },
+   "tickers": [
+    "CRWD",
+    "ZS"
+   ],
+   "status": null,
+   "confidence": "high",
+   "source": "CNBC",
+   "date": "2026-11-23",
+   "url": "https://www.cnbc.com/2026/11/23/crowdstrike-zscaler-aquisition-ai-cyberattacks.html",
+   "agreement": "1/3"
+  },
+  {
+   "headline": {
+    "en": "Oil slumps to a three-month low",
+    "ar": "النفط يهبط إلى أدنى مستوى في ثلاثة أشهر"
+   },
+   "summary": {
+    "en": "WTI settled at US$80.17, down 3.88%, on rising Middle East supply and a Libyan pipeline restart.",
+    "ar": "استقر خام WTI عند 80.17 دولارًا أمريكيًا منخفضًا 3.88%، بسبب زيادة إمدادات الشرق الأوسط وإعادة تشغيل خط أنابيب ليبي."
+   },
+   "why_it_matters_cad": {
+    "en": "Weighs on TSX energy stocks and the loonie, but eases inflation.",
+    "ar": "يضغط على أسهم الطاقة في TSX وعلى الدولار الكندي، لكنه يخفف التضخم."
+   },
+   "tickers": [
+    "CL=F"
+   ],
+   "status": null,
+   "confidence": "high",
+   "source": "Reuters",
+   "date": "2026-11-23",
+   "url": "https://finance.yahoo.com/news/oil-prices-fall-amid-equity-022442236.html",
+   "agreement": "3/3"
+  },
+  {
+   "headline": {
+    "en": "S&P 500 and Dow fell into correction in last week's AI rout",
+    "ar": "S&P 500 وDow دخلا مرحلة التصحيح في موجة بيع أسهم الذكاء الاصطناعي الأسبوع الماضي"
+   },
+   "summary": {
+    "en": "On Nov 20 the S&P 500 fell 3.7% and the Nasdaq 5.3%; for the week, the S&P 500 lost 8.6% and the Nasdaq 10%.",
+    "ar": "في 20 نوفمبر هبط S&P 500 بنسبة 3.7% وNasdaq بنسبة 5.3%، وعلى مدى الأسبوع خسر S&P 500 نسبة 8.6% وNasdaq نسبة 10%."
+   },
+   "why_it_matters_cad": {
+    "en": "Shows how much AI concentration risk sits inside US index funds.",
+    "ar": "يوضح حجم مخاطر التركّز في أسهم الذكاء الاصطناعي داخل صناديق المؤشرات الأمريكية."
+   },
+   "tickers": [
+    "VFV.TO",
+    "ZQQ.TO"
+   ],
+   "status": null,
+   "confidence": "high",
+   "source": "AP",
+   "date": "2026-11-20",
+   "url": "https://finance.yahoo.com/markets/stocks/articles/major-us-stock-indexes-fared-213016263.html",
+   "agreement": "2/3"
+  },
+  {
+   "headline": {
+    "en": "Nvidia-led rebound starts to fade on Nov 24",
+    "ar": "الارتداد بقيادة Nvidia يبدأ في التلاشي في 24 نوفمبر"
+   },
+   "summary": {
+    "en": "In early trading Nvidia was down about 5–6% and the Nasdaq was lower; these are intraday figures, not closes.",
+    "ar": "في التداولات المبكرة كان سهم Nvidia منخفضًا بنحو 5–6% وتراجع Nasdaq، وهذه أرقام خلال الجلسة وليست أسعار إغلاق."
+   },
+   "why_it_matters_cad": {
+    "en": "A reminder of how fast concentrated tech exposure can reverse.",
+    "ar": "تذكير بمدى سرعة انعكاس الانكشاف المركّز على أسهم التكنولوجيا."
+   },
+   "tickers": [
+    "NVDA",
+    "ZQQ.TO"
+   ],
+   "status": null,
+   "confidence": "medium",
+   "source": "Reuters / Yahoo Finance",
+   "date": "2026-11-24",
+   "url": "https://finance.yahoo.com/markets/stocks/live/nvidia-live-updates-jensen-huang-reinstated-as-ceo-trump-says-he-convinced-board-165423793.html",
+   "agreement": "2/3"
+  },
+  {
+   "headline": {
+    "en": "Telus slips as Quebecor takeover talks go private",
+    "ar": "سهم Telus يتراجع مع تحوّل محادثات استحواذ Quebecor إلى السرية"
+   },
+   "summary": {
+    "en": "Telus fell 4.86% to C$15.09 after its CEO met Quebecor's chief about a buyout proposal and both sides agreed to keep further talks confidential.",
+    "ar": "تراجع سهم Telus بنسبة 4.86% إلى 15.09 دولارًا كنديًا، بعد أن التقى رئيسه التنفيذي برئيس Quebecor بشأن عرض الاستحواذ واتفق الطرفان على إبقاء المحادثات اللاحقة سرية."
+   },
+   "why_it_matters_cad": {
+    "en": "A large Canadian telecom deal could reshape TSX telecom and dividend weights.",
+    "ar": "قد تعيد صفقة اتصالات كندية كبيرة تشكيل أوزان قطاع الاتصالات وأسهم التوزيعات في TSX."
+   },
+   "tickers": [
+    "T.TO",
+    "QBR-B.TO"
+   ],
+   "status": null,
+   "confidence": "medium",
+   "source": "Morningstar / Kalkine",
+   "date": "2026-11-23",
+   "url": "https://kalkine.ca/news/technology/why-telus-corporation-tsxt-eased-on-the-sptsx-composite-as-quebecor-and-telus-took-their-takeover-talks-private",
+   "agreement": "editor"
+  }
+ ],
+ "calendar": [
+  {
+   "date": "2026-11-24",
+   "event": {
+    "en": "Bank of Canada Governor Macklem speaks at the Economic Club of Canada (12:40 ET)",
+    "ar": "كلمة محافظ Bank of Canada السيد Macklem أمام Economic Club of Canada (الساعة 12:40 بتوقيت شرق أمريكا)"
+   },
+   "why": {
+    "en": "Could tilt odds of a Dec 9 hike and move the loonie.",
+    "ar": "قد تؤثر على احتمالات رفع الفائدة في 9 ديسمبر وتحرّك الدولار الكندي."
+   },
+   "source": "Bank of Canada"
+  },
+  {
+   "date": "2026-12-03",
+   "event": {
+    "en": "Royal Bank of Canada Q4 and fiscal 2026 results",
+    "ar": "نتائج Royal Bank of Canada للربع الرابع والسنة المالية 2026"
+   },
+   "why": {
+    "en": "A read on credit quality at Canada's largest bank.",
+    "ar": "مؤشر على جودة الائتمان في أكبر بنك كندي."
+   },
+   "source": "RBC"
+  },
+  {
+   "date": "2026-12-04",
+   "event": {
+    "en": "US jobs report for November",
+    "ar": "تقرير الوظائف الأمريكي لشهر نوفمبر"
+   },
+   "why": {
+    "en": "Could change the size of the expected Fed hike.",
+    "ar": "قد يغيّر حجم رفع الفائدة المتوقع من Fed."
+   },
+   "source": "US Bureau of Labor Statistics"
+  },
+  {
+   "date": "2026-12-09",
+   "event": {
+    "en": "Bank of Canada rate announcement (9:45 ET)",
+    "ar": "إعلان Bank of Canada عن سعر الفائدة (الساعة 9:45 بتوقيت شرق أمريكا)"
+   },
+   "why": {
+    "en": "Moves the loonie and Canadian bank stocks.",
+    "ar": "يحرّك الدولار الكندي وأسهم البنوك الكندية."
+   },
+   "source": "Bank of Canada"
+  },
+  {
+   "date": "2026-12-09",
+   "event": {
+    "en": "Fed (FOMC) rate decision, Dec 8–9 meeting",
+    "ar": "قرار Fed (FOMC) بشأن الفائدة، اجتماع 8–9 ديسمبر"
+   },
+   "why": {
+    "en": "A hike is priced; the question is 25 or 50bp.",
+    "ar": "رفع الفائدة مسعَّر، والسؤال هو هل سيكون 25 أم 50 نقطة أساس."
+   },
+   "source": "Federal Reserve"
+  },
+  {
+   "date": "2026-12-10",
+   "event": {
+    "en": "US CPI for November",
+    "ar": "مؤشر أسعار المستهلك الأمريكي CPI لشهر نوفمبر"
+   },
+   "why": {
+    "en": "Inflation check right after the Fed decision.",
+    "ar": "اختبار للتضخم مباشرة بعد قرار Fed."
+   },
+   "source": "US Bureau of Labor Statistics"
+  },
+  {
+   "date": "2026-12-14",
+   "event": {
+    "en": "Canada CPI for November",
+    "ar": "مؤشر أسعار المستهلك الكندي CPI لشهر نوفمبر"
+   },
+   "why": {
+    "en": "First inflation data after the Bank of Canada decision.",
+    "ar": "أول بيانات تضخم بعد قرار Bank of Canada."
+   },
+   "source": "Statistics Canada"
+  }
+ ],
+ "unconfirmed": [
+  {
+   "claim": {
+    "en": "Bank of Canada December hike odds: about 80% from swaps (BBH) versus about 46% from OIS (RateProbability).",
+    "ar": "احتمالات رفع Bank of Canada للفائدة في ديسمبر: نحو 80% وفق عقود المبادلة (BBH) مقابل نحو 46% وفق OIS (RateProbability)."
+   },
+   "from": [
+    "claude"
+   ],
+   "status": "disputed",
+   "note": {
+    "en": "No major-outlet figure found; left out of the indicators.",
+    "ar": "لم يُعثر على رقم من وسيلة إعلامية كبرى، لذا استُبعد من المؤشرات."
+   },
+   "source": null,
+   "date": null
+  },
+  {
+   "claim": {
+    "en": "President Trump said he 'convinced' Nvidia's board to reinstate Huang.",
+    "ar": "قال الرئيس Trump إنه 'أقنع' مجلس إدارة Nvidia بإعادة تعيين Huang."
+   },
+   "from": [
+    "claude"
+   ],
+   "status": "unverified",
+   "note": {
+    "en": "Nvidia's filing says only that the board received input from senior US government officials.",
+    "ar": "يذكر إفصاح Nvidia فقط أن المجلس تلقى آراء من كبار مسؤولي الحكومة الأمريكية."
+   },
+   "source": null,
+   "date": null
+  },
+  {
+   "claim": {
+    "en": "RY.TO closed at 188.19, up 2.58%.",
+    "ar": "أغلق RY.TO عند 188.19 مرتفعًا 2.58%."
+   },
+   "from": [
+    "gemini"
+   ],
+   "status": "wrong",
+   "note": {
+    "en": "That is the NYSE-listed RY price in USD. RY.TO closed at C$270.29, up 2.75%.",
+    "ar": "هذا هو سعر RY المدرج في NYSE بالدولار الأمريكي، أما RY.TO فقد أغلق عند 270.29 دولارًا كنديًا مرتفعًا 2.75%."
+   },
+   "source": null,
+   "date": null
+  },
+  {
+   "claim": {
+    "en": "Russell 2000 rose 0.25% to 2,669.10.",
+    "ar": "ارتفع Russell 2000 بنسبة 0.25% إلى 2,669.10."
+   },
+   "from": [
+    "gemini"
+   ],
+   "status": "wrong",
+   "note": {
+    "en": "AP reports +3.4% to 2,669.66.",
+    "ar": "تفيد AP بارتفاع 3.4% إلى 2,669.66."
+   },
+   "source": null,
+   "date": null
+  },
+  {
+   "claim": {
+    "en": "BIPC.TO rose 13.96%; SCR.TO fell 5.46%; IP, ELV and BF-B were among the biggest S&P 500 losers.",
+    "ar": "ارتفع BIPC.TO بنسبة 13.96%، وتراجع SCR.TO بنسبة 5.46%، وكانت IP وELV وBF-B من بين أكبر الخاسرين في S&P 500."
+   },
+   "from": [
+    "chatgpt"
+   ],
+   "status": "unverified",
+   "note": {
+    "en": "Single-source screens that could not be re-checked.",
+    "ar": "مصدرها قوائم من مصدر واحد تعذّر التحقق منها مجددًا."
+   },
+   "source": null,
+   "date": null
+  },
+  {
+   "claim": {
+    "en": "The US may be preparing new tariffs on China and other countries (WSJ via Reuters).",
+    "ar": "قد تكون الولايات المتحدة بصدد فرض رسوم جمركية جديدة على الصين ودول أخرى (WSJ عبر Reuters)."
+   },
+   "from": [
+    "chatgpt"
+   ],
+   "status": "unverified",
+   "note": {
+    "en": "No official confirmation found.",
+    "ar": "لم يُعثر على تأكيد رسمي."
+   },
+   "source": null,
+   "date": null
+  },
+  {
+   "claim": {
+    "en": "Nvidia launched a Chief Compliance Officer search with the reinstatement.",
+    "ar": "أطلقت Nvidia عملية بحث عن رئيس للامتثال بالتزامن مع إعادة التعيين."
+   },
+   "from": [
+    "gemini"
+   ],
+   "status": "unverified",
+   "note": {
+    "en": "Not found in the parts of the 8-K that were checked.",
+    "ar": "لم يُعثر عليه في أجزاء نموذج 8-K التي جرى فحصها."
+   },
+   "source": null,
+   "date": null
+  },
+  {
+   "claim": {
+    "en": "Huang will testify behind closed doors to House committees on Dec 1–2.",
+    "ar": "سيدلي Huang بشهادته في جلسات مغلقة أمام لجان مجلس النواب يومي 1–2 ديسمبر."
+   },
+   "from": [
+    "claude"
+   ],
+   "status": "unverified",
+   "note": {
+    "en": "Reported by NPR on Nov 17, before he was reinstated; not re-checked.",
+    "ar": "أوردته NPR في 17 نوفمبر قبل إعادة تعيينه، ولم يُتحقق منه مجددًا."
+   },
+   "source": null,
+   "date": null
+  }
+ ],
+ "disagreements": [
+  {
+   "topic": {
+    "en": "USD/CAD level",
+    "ar": "مستوى USD/CAD"
+   },
+   "positions": {
+    "en": "Gemini: 0.6959 labelled as USD/CAD (it is actually CAD/USD); ChatGPT: 1.4369 Bank of Canada daily rate; Claude: 1.4325 Friday close.",
+    "ar": "Gemini: 0.6959 تحت مسمى USD/CAD (وهو في الواقع CAD/USD)؛ ChatGPT: 1.4369 السعر اليومي لـ Bank of Canada؛ Claude: 1.4325 إغلاق يوم الجمعة."
+   },
+   "resolution": {
+    "en": "Kept Reuters' 1.4380 for Nov 23, the 19-month low; all three agree the CAD weakened.",
+    "ar": "اعتمدنا رقم Reuters البالغ 1.4380 ليوم 23 نوفمبر، وهو أدنى مستوى في 19 شهرًا، وتتفق التقارير الثلاثة على ضعف CAD."
+   }
+  },
+  {
+   "topic": {
+    "en": "Market mood",
+    "ar": "مزاج السوق"
+   },
+   "positions": {
+    "en": "ChatGPT and Gemini: mixed; Claude: risk-on.",
+    "ar": "ChatGPT وGemini: مختلط؛ Claude: إقبال على المخاطرة."
+   },
+   "resolution": {
+    "en": "Kept 'mixed': Monday was strongly risk-on, but the week was negative and the rally faded on Nov 24.",
+    "ar": "اعتمدنا 'مختلط': كان يوم الاثنين إقبالًا قويًا على المخاطرة، لكن الأسبوع كان سلبيًا وتلاشى الصعود في 24 نوفمبر."
+   }
+  },
+  {
+   "topic": {
+    "en": "Gold price",
+    "ar": "سعر الذهب"
+   },
+   "positions": {
+    "en": "ChatGPT: 3,654.97 spot, +3.5% intraday (Reuters); Gemini: 3,652; Claude: 3,651.40 futures.",
+    "ar": "ChatGPT: 3,654.97 سعر فوري بارتفاع 3.5% خلال الجلسة (Reuters)؛ Gemini: 3,652؛ Claude: 3,651.40 عقود آجلة."
+   },
+   "resolution": {
+    "en": "The gap is under 0.1%; kept the futures settlement and gave no percentage change.",
+    "ar": "الفارق أقل من 0.1%، فاعتمدنا سعر تسوية العقود الآجلة دون ذكر نسبة التغير."
+   }
+  },
+  {
+   "topic": {
+    "en": "Bitcoin",
+    "ar": "Bitcoin"
+   },
+   "positions": {
+    "en": "Claude's sources gave a daily change from +0.14% to +3.9%; the other reports omitted it.",
+    "ar": "أعطت مصادر Claude تغيرًا يوميًا يتراوح بين +0.14% و+3.9%، وأغفلته التقارير الأخرى."
+   },
+   "resolution": {
+    "en": "Dropped from indicators.",
+    "ar": "حُذف من المؤشرات."
+   }
+  },
+  {
+   "topic": {
+    "en": "Fed odds",
+    "ar": "احتمالات Fed"
+   },
+   "positions": {
+    "en": "Claude: about 95% (CME FedWatch via AP, Nov 18); ChatGPT: 25bp fully priced (Reuters, Nov 24); Gemini: none.",
+    "ar": "Claude: نحو 95% (CME FedWatch عبر AP، 18 نوفمبر)؛ ChatGPT: 25 نقطة أساس مسعَّرة بالكامل (Reuters، 24 نوفمبر)؛ Gemini: لا شيء."
+   },
+   "resolution": {
+    "en": "The two are consistent; kept the dated 95% figure and mentioned the newer Reuters wording.",
+    "ar": "الرقمان متسقان، فاعتمدنا رقم 95% المؤرخ مع الإشارة إلى صياغة Reuters الأحدث."
+   }
+  },
+  {
+   "topic": {
+    "en": "Canada 10-year yield",
+    "ar": "عائد السندات الكندية لأجل 10 سنوات"
+   },
+   "positions": {
+    "en": "3.69 (Gemini, Claude) vs 3.68 (ChatGPT, Bank of Canada).",
+    "ar": "3.69 (Gemini وClaude) مقابل 3.68 (ChatGPT وBank of Canada)."
+   },
+   "resolution": {
+    "en": "The gap is under 0.1 percentage point; kept 3.69 and noted the other figure.",
+    "ar": "الفارق أقل من 0.1 نقطة مئوية، فاعتمدنا 3.69 مع الإشارة إلى الرقم الآخر."
+   }
+  }
+ ],
+ "sources": [
+  {
+   "publisher": "NVIDIA (SEC)",
+   "title": "NVIDIA Board Reinstates Jensen Huang as President, CEO and Board Director",
+   "date": "2026-11-23",
+   "url": "https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000090/nov23pressrelease.htm"
+  },
+  {
+   "publisher": "AP via Yahoo Finance",
+   "title": "How major US stock indexes fared Monday 11/23/2026",
+   "date": "2026-11-23",
+   "url": "https://finance.yahoo.com/markets/world-indices/articles/major-us-stock-indexes-fared-213053319.html"
+  },
+  {
+   "publisher": "AP via Yahoo Finance",
+   "title": "How major US stock indexes fared Friday 11/20/2026",
+   "date": "2026-11-20",
+   "url": "https://finance.yahoo.com/markets/stocks/articles/major-us-stock-indexes-fared-213016263.html"
+  },
+  {
+   "publisher": "Reuters via MarketScreener",
+   "title": "TSX posts biggest daily gain since April 2025, led by tech and mining",
+   "date": "2026-11-23",
+   "url": "https://www.marketscreener.com/news/tsx-posts-biggest-daily-gain-since-april-2025-led-by-tech-and-mining-ce7851dadf8bf126"
+  },
+  {
+   "publisher": "Reuters via The Globe and Mail",
+   "title": "Canadian dollar on its longest daily losing streak in more than a decade",
+   "date": "2026-11-23",
+   "url": "https://www.theglobeandmail.com/investing/article-canadian-dollar-on-its-longest-daily-losing-streak-in-more-than-a/"
+  },
+  {
+   "publisher": "Reuters via Yahoo Finance",
+   "title": "Oil slumps to 3-month low on increased Middle East flows, Libyan pipeline restart",
+   "date": "2026-11-23",
+   "url": "https://finance.yahoo.com/news/oil-prices-fall-amid-equity-022442236.html"
+  },
+  {
+   "publisher": "CNBC",
+   "title": "CrowdStrike to buy Zscaler in $44 billion deal as AI supercharges cyberattacks",
+   "date": "2026-11-23",
+   "url": "https://www.cnbc.com/2026/11/23/crowdstrike-zscaler-aquisition-ai-cyberattacks.html"
+  },
+  {
+   "publisher": "CrowdStrike",
+   "title": "CrowdStrike to Acquire Zscaler, Bringing Network Security and Zero Trust to the Falcon Platform",
+   "date": "2026-11-23",
+   "url": "https://ir.crowdstrike.com/news-releases/news-release-details/crowdstrike-acquire-zscaler-bringing-network-security-and-zero"
+  },
+  {
+   "publisher": "Yahoo Finance",
+   "title": "S&P/TSX Composite index (^GSPTSE)",
+   "date": "2026-11-23",
+   "url": "https://ca.finance.yahoo.com/quote/%5EGSPTSE/"
+  },
+  {
+   "publisher": "Yahoo Finance",
+   "title": "Royal Bank of Canada (RY.TO)",
+   "date": "2026-11-23",
+   "url": "https://ca.finance.yahoo.com/quote/RY.TO/"
+  },
+  {
+   "publisher": "Motley Fool",
+   "title": "Royal Bank Of Canada (TSX: RY) price returns",
+   "date": "2026-11-23",
+   "url": "https://www.fool.com/quote/tsx/ry/"
+  },
+  {
+   "publisher": "Yahoo Finance",
+   "title": "Shopify Inc. (SHOP.TO)",
+   "date": "2026-11-23",
+   "url": "https://finance.yahoo.com/quote/SHOP.TO/"
+  },
+  {
+   "publisher": "Yahoo Finance",
+   "title": "Microsoft Corporation (MSFT) historical prices",
+   "date": "2026-11-23",
+   "url": "https://finance.yahoo.com/quote/MSFT/history/"
+  },
+  {
+   "publisher": "Vanguard Canada",
+   "title": "(VFV) Vanguard S&P 500 Index ETF",
+   "date": "2026-11-23",
+   "url": "https://www.vanguard.ca/en/product/etf/equity/9563/vanguard-sp-500-index-etf"
+  },
+  {
+   "publisher": "Longbridge",
+   "title": "Top 5 US Stock Gainers/Losers (>100B) (11.23)",
+   "date": "2026-11-23",
+   "url": "https://longbridge.com/en/news/306543552"
+  },
+  {
+   "publisher": "Longbridge",
+   "title": "Top 10 US Stock Gainers (11.23)",
+   "date": "2026-11-23",
+   "url": "https://longbridge.com/en/news/306543642"
+  },
+  {
+   "publisher": "Morningstar",
+   "title": "TELUS Corp (XTSE: T) quote",
+   "date": "2026-11-23",
+   "url": "https://www.morningstar.com/stocks/xtse/t/quote"
+  },
+  {
+   "publisher": "Kalkine",
+   "title": "Why TELUS Corporation (TSX:T) eased as Quebecor and Telus took their takeover talks private",
+   "date": "2026-11-23",
+   "url": "https://kalkine.ca/news/technology/why-telus-corporation-tsxt-eased-on-the-sptsx-composite-as-quebecor-and-telus-took-their-takeover-talks-private"
+  },
+  {
+   "publisher": "BondStats",
+   "title": "Treasury yields finish little changed; 10-year ends at 4.92%",
+   "date": "2026-11-23",
+   "url": "https://www.bondstats.org/daily/2026-11-23/"
+  },
+  {
+   "publisher": "Trading Economics",
+   "title": "Canada 10-Year Government Bond Yield",
+   "date": "2026-11-23",
+   "url": "https://tradingeconomics.com/canada/government-bond-yield"
+  },
+  {
+   "publisher": "Investrade",
+   "title": "Market Review: November 23, 2026",
+   "date": "2026-11-23",
+   "url": "https://investrade.com/market-review-november-23-2026/"
+  },
+  {
+   "publisher": "AP via WBRZ",
+   "title": "Fed minutes: Higher interest rates needed in December as inflation worries mount",
+   "date": "2026-11-18",
+   "url": "https://www.wbrz.com/news/fed-minutes-higher-interest-rates-needed-in-december-as-inflation-worries-mount/"
+  },
+  {
+   "publisher": "Bank of Canada",
+   "title": "Speech by Tiff Macklem, Governor of the Bank of Canada (Economic Club of Canada)",
+   "date": "2026-11-24",
+   "url": "https://www.bankofcanada.ca/2026/11/speech-tiff-macklem-governor-bank-canada-2026-11-24/"
+  },
+  {
+   "publisher": "US Bureau of Labor Statistics",
+   "title": "Release schedule, December 2026",
+   "date": "2026-11-24",
+   "url": "https://www.bls.gov/schedule/2026/12_sched_list.htm"
+  },
+  {
+   "publisher": "Yahoo Finance",
+   "title": "Nvidia live updates: Nvidia stock falls as exuberance fades after Jensen Huang's return as CEO",
+   "date": "2026-11-24",
+   "url": "https://finance.yahoo.com/markets/stocks/live/nvidia-live-updates-jensen-huang-reinstated-as-ceo-trump-says-he-convinced-board-165423793.html"
+  }
+ ]
+}

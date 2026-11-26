@@ -1,0 +1,8 @@
+{
+  "name": "portfolio-simulator",
+  "private": true,
+  "description": "Static site: nothing to build. The files are served as they are.",
+  "scripts": {
+    "build": "echo 'Static site: nothing to build'"
+  }
+}
